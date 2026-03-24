@@ -19,6 +19,7 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
   const [stats, setStats] = useState({ total: 0, disputes: 0, tps: 5.0 });
   const [newIds, setNewIds] = useState(new Set());
   const [filterMode, setFilterMode] = useState('ALL'); // 'ALL' or 'DISPUTES'
+  const [error, setError] = useState(null); // [NEW] Error tracking
   const prevIdsRef = useRef(new Set());
 
   useEffect(() => {
@@ -54,8 +55,10 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
           disputes: globalStats.disputes,
           tps: globalStats.tps || 5.0,
         });
+        setError(null);
       } catch (err) {
-        // silently fail
+        console.error("API Fetch Error:", err);
+        setError(err.message || "Failed to reach Connex API");
       }
     };
     
@@ -78,6 +81,14 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
               <p className="text-slate-500 text-sm mt-1">Real-time coordination events across Bank A and Bank B</p>
             </div>
           </div>
+          
+          {/* Error Alert (Diagnostic) */}
+          {error && (
+            <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-xs font-mono flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4" />
+              <span>DIAGNOSTIC: {error} (Check browser console for details)</span>
+            </div>
+          )}
           
           {/* Stats Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -14,7 +14,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security and Logging Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for PoC to prevent frontend blocks
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
