@@ -75,9 +75,15 @@ function runSimulation() {
   }, interval);
 }
 
-if (!API_KEY) {
-  console.error('ERROR: API_KEY must be set in .env');
-  process.exit(1);
-}
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-runSimulation();
+app.get('/', (req, res) => {
+  res.send({ status: 'simulation_active', tx_processed: txCounter });
+});
+
+app.listen(PORT, () => {
+  console.log(`[SIM] Web interface live on port ${PORT}`);
+  runSimulation();
+});
