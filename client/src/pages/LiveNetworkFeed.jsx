@@ -28,11 +28,9 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
         const res = await api.get('/tx/recent');
         const evts = res.data.events || [];
         
-        // 2. Fetch global dispute count from Supabase (Real stats)
-        // Note: For the prototype we treat all REJECTs as the global count
-        const statsRes = await api.get('/tx/recent?limit=1000'); // Get a larger sample for stats
-        const allEvts = statsRes.data.events || [];
-        const globalDisputes = allEvts.filter(e => e.event_type === 'REJECT' || e.event_type === 'DISPUTE').length;
+        // 2. Fetch global dispute count from API (Real 24/7 stats)
+        const statsRes = await api.get('/tx/stats');
+        const globalStats = statsRes.data;
         
         // Detect newly arrived transactions for slide-in animation
         const currentIds = new Set(evts.map(e => e.id));
@@ -52,9 +50,9 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
         
         // Compute stats
         setStats({
-          total: evts.length > 0 ? evts[0].id : 0,
-          disputes: globalDisputes,
-          tps: 5.0,
+          total: globalStats.total,
+          disputes: globalStats.disputes,
+          tps: globalStats.tps || 5.0,
         });
       } catch (err) {
         // silently fail
