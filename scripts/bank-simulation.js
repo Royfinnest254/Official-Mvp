@@ -15,16 +15,23 @@ const API_KEY = process.env.API_KEY;
 // if you send 800 requests per second to them.
 const TARGET_TPS = 5;
 
+let txCounter = 0;
+
 /**
  * Generate a random coordination event
  */
 function generateEvent() {
   const isBankA = Math.random() > 0.5;
+  txCounter++;
+  
+  // Every 25th transaction (exactly every 5 seconds at 5 TPS) is a dispute
+  const isDispute = (txCounter % 25 === 0);
+  
   return {
     institution_a: isBankA ? 'BANK_A_KE' : 'BANK_B_KE',
     institution_b: isBankA ? 'BANK_B_KE' : 'BANK_A_KE',
-    event_type: 'CONFIRM',
-    tx_ref_hash: crypto.randomBytes(32).toString('hex'), // SHA-256 simulation
+    event_type: isDispute ? 'REJECT' : 'CONFIRM',
+    tx_ref_hash: 'OQX' + Math.floor(Math.random() * 1000000).toString(),
     timestamp: Date.now(),
     account_info: {
       sender: `ACC-${Math.floor(Math.random() * 100000)}`,
@@ -43,14 +50,14 @@ async function sendEvent() {
     const response = await axios.post(GATEWAY_URL, event, {
       headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' }
     });
-    // Log occasionally to show it's working without flooding console
-    if (Math.random() < 0.01) {
-      console.log(`[BANK] Sent Tx: ${event.tx_ref_hash.substring(0, 8)}... Result: ${response.status}`);
+    // Log occasionally to show it's working
+    if (event.event_type === 'REJECT') {
+      console.log(`[DISPUTE INJECTED] Tx: ${event.tx_ref_hash} | Status: 200`);
+    } else if (txCounter % 10 === 0) {
+      console.log(`[BANK] Sent 10 Txs... Latest: ${event.tx_ref_hash}`);
     }
   } catch (error) {
-    if (Math.random() < 0.01) {
-      console.error(`[BANK] Error sending event: ${error.message}`);
-    }
+    console.error(`[BANK] Error sending event: ${error.message}`);
   }
 }
 

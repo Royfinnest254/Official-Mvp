@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle, Copy, Check } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
 // We are querying the production cloud directly!
@@ -14,14 +14,30 @@ const api = axios.create({
   }
 });
 
-export default function DisputePortal() {
-  const [txId, setTxId] = useState('');
+export default function DisputePortal({ initialTxId }) {
+  const [txId, setTxId] = useState(initialTxId || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
+  const [copied, setCopied] = useState(false);
+
+  React.useEffect(() => {
+    if (initialTxId) {
+       setTxId(initialTxId);
+       // Auto-trigger search when navigating from Live Feed
+       setTimeout(async () => {
+         try {
+           const response = await api.get(`/tx/${initialTxId.trim()}`);
+           if (response.data.events && response.data.events.length > 0) {
+             setEvents(response.data.events);
+           }
+         } catch (err) { console.error(err); }
+       }, 100);
+    }
+  }, [initialTxId]);
 
   const handleSearch = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!txId.trim()) return;
 
     setLoading(true);
@@ -45,6 +61,29 @@ export default function DisputePortal() {
 
   const verifySignature = (sig) => {
     return sig && sig.length > 20 && sig !== 'NODE_OFFLINE';
+  };
+
+  const copyProofBundle = (event) => {
+    const proof = `CONNEX PROOF BUNDLE\n` +
+      `========================\n` +
+      `Transaction ID: ${event.tx_ref_hash}\n` +
+      `Bundle ID: ${event.bundle_id}\n` +
+      `Timestamp: ${new Date(parseInt(event.event_ts)).toLocaleString()}\n` +
+      `Event Type: ${event.event_type}\n` +
+      `Sending Institution: ${event.institution_a}\n` +
+      `Receiving Institution: ${event.institution_b}\n` +
+      `========================\n` +
+      `Chain Hash: ${event.chain_hash}\n` +
+      `Previous Hash: ${event.prev_hash}\n` +
+      `========================\n` +
+      `Witness Node 1 (AWS): ${event.sig_node_1 || 'N/A'}\n` +
+      `Witness Node 2 (GCP): ${event.sig_node_2 || 'N/A'}\n` +
+      `Witness Node 3 (Azure): ${event.sig_node_3 || 'N/A'}\n` +
+      `========================\n` +
+      `Verified by CONNEX Technologies | connex.co.ke`;
+    navigator.clipboard.writeText(proof);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -71,7 +110,7 @@ export default function DisputePortal() {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-blue-700 text-white font-medium rounded-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 transition-colors"
+              className="px-8 py-3 bg-blue-700 text-white font-medium rounded-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 transition-colors whitespace-nowrap"
             >
               {loading ? 'Querying Ledger...' : 'Verify Record'}
             </button>
@@ -133,8 +172,10 @@ export default function DisputePortal() {
                        </h3>
                        <p className="text-lg text-slate-800 font-medium leading-relaxed">
                          {consensusMet 
-                           ? `The funds successfully moved from ${event.institution_a} and arrived at ${event.institution_b} on ${new Date(parseInt(event.event_ts)).toLocaleString()}. Bank B is currently holding the funds.`
-                           : `This transaction could not be verified by the independent cloud witnesses. Please escalate this dispute.`}
+                           ? event.event_type === 'REJECT' || event.event_type === 'DISPUTE'
+                              ? `Network Consensus reached! However, the funds FAILED to move from ${event.institution_a} to ${event.institution_b} on ${new Date(parseInt(event.event_ts)).toLocaleString()}. The funds are STILL with ${event.institution_a}.`
+                              : `Network Consensus reached! The funds successfully moved from ${event.institution_a} and arrived at ${event.institution_b} on ${new Date(parseInt(event.event_ts)).toLocaleString()}. ${event.institution_b} is currently holding the funds.`
+                           : `This transaction could not be verified by the independent cloud witnesses. Please escalate this dispute immediately.`}
                        </p>
                     </div>
 
@@ -213,10 +254,29 @@ export default function DisputePortal() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Copy Proof Bundle Button */}
+                    <div className="mt-6 pt-5 border-t border-slate-100 flex justify-end">
+                       <button
+                         onClick={() => copyProofBundle(event)}
+                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-md hover:bg-slate-800 transition-colors shadow-sm"
+                       >
+                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                         {copied ? 'Copied to Clipboard!' : 'Copy Proof Bundle'}
+                       </button>
+                    </div>
                   </div>
                 </div>
                );
             })}
+          </div>
+        )}
+        
+        {events.length === 0 && !error && (
+          <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-lg">
+             <ShieldCheck className="w-12 h-12 text-slate-300 mb-4" />
+             <h3 className="text-lg font-medium text-slate-900 mb-1">No Active Dispute</h3>
+             <p className="text-slate-500 max-w-sm">Enter a Transaction ID from the live feed to instantly verify its cryptographic proof across the Connex Network.</p>
           </div>
         )}
       </div>

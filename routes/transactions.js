@@ -11,7 +11,7 @@ router.get('/recent', async (req, res) => {
       .from('coordination_records')
       .select('id, bundle_id, tx_ref_hash, institution_a, institution_b, event_type, event_ts, chain_hash')
       .order('id', { ascending: false })
-      .limit(10);
+      .limit(50);
 
     if (error) throw error;
     res.json({ events: records });
