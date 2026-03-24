@@ -39,6 +39,9 @@ app.use('/tx', authenticate, transactionRoutes);
 // [NEW] PRD v0.1 Endpoints
 app.use('/v1/events', eventsRoutes);
 
+// Lightweight Ping for Cron-jobs
+app.get('/ping', (req, res) => res.send('pong'));
+
 // Root Route (Premium Welcome message)
 app.get('/', (req, res) => {
   res.send(`

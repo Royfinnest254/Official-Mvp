@@ -79,6 +79,8 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.get('/ping', (req, res) => res.send('pong'));
+
 app.get('/', (req, res) => {
   res.send({ status: 'simulation_active', tx_processed: txCounter });
 });
