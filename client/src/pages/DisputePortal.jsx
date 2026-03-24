@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
-// In dev use localhost, but gracefully fallback if deployed
-const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://official-mvp.onrender.com';
+// We are querying the production cloud directly!
+const API_BASE_URL = 'https://official-mvp.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -63,7 +63,7 @@ export default function DisputePortal() {
               <input
                 type="text"
                 className="block w-full pl-11 pr-4 py-3 border border-slate-300 rounded-md leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 sm:text-sm shadow-sm transition-all"
-                placeholder="Enter Transaction ID Hash (e.g. a3f4d2...)"
+                placeholder="Enter Transaction ID (e.g. OQX123456)"
                 value={txId}
                 onChange={(e) => setTxId(e.target.value)}
               />
@@ -125,6 +125,19 @@ export default function DisputePortal() {
 
                   {/* Event Body */}
                   <div className="p-6">
+                    {/* The Non-Technical Verdict (What the Agent Reads to the Customer) */}
+                    <div className={`mb-8 p-5 rounded-lg border-2 ${consensusMet ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
+                       <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-2 flex items-center">
+                          <ShieldCheck className={`w-5 h-5 mr-2 ${consensusMet ? 'text-blue-600' : 'text-red-600'}`} />
+                          Official System Verdict
+                       </h3>
+                       <p className="text-lg text-slate-800 font-medium leading-relaxed">
+                         {consensusMet 
+                           ? `The funds successfully moved from ${event.institution_a} and arrived at ${event.institution_b} on ${new Date(parseInt(event.event_ts)).toLocaleString()}. Bank B is currently holding the funds.`
+                           : `This transaction could not be verified by the independent cloud witnesses. Please escalate this dispute.`}
+                       </p>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-8 mb-8">
                       <div>
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Sending Institution</p>

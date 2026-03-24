@@ -10,7 +10,7 @@ async function getOneTx() {
     institution_a: 'BANK_A_KE',
     institution_b: 'BANK_B_KE',
     event_type: 'CONFIRM',
-    tx_ref_hash: crypto.randomBytes(32).toString('hex'),
+    tx_ref_hash: 'OQX' + Math.floor(Math.random() * 1000000).toString(),
     timestamp: Date.now(),
     account_info: {
       sender: 'DISPUTE_TEST_SENDER',
