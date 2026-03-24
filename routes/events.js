@@ -68,7 +68,7 @@ router.post('/', authenticate, async (req, res) => {
       try {
         if (!url) return null; // If URL isn't configured yet
         const start = Date.now();
-        const response = await axios.post(url, { hash: chain_hash }, { timeout: 3000 });
+        const response = await axios.post(url, { hash: chain_hash }, { timeout: 15000 });
         const latency = Date.now() - start;
         return { node: idx + 1, signature: response.data.signature, latency };
       } catch (err) {

@@ -1,13 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0b0e14;
-  --color-surface: #11141d;
-  --color-border-subtle: rgba(255, 255, 255, 0.05);
-  --color-primary: #3b82f6;
-  --color-secondary: #6366f1;
-  --color-accent: #f43f5e;
-  --color-success: #10b981;
+  --color-primary: #1d4ed8;
+  --color-secondary: #0f172a;
+  --color-accent: #0284c7;
+  --color-success: #16a34a;
   
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -15,29 +12,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-slate-300 antialiased font-sans selection:bg-primary/20;
-  }
-}
-
-@layer components {
-  .tech-card {
-    @apply bg-surface border border-border-subtle rounded-md overflow-hidden shadow-sm;
-  }
-  
-  .tech-button {
-    @apply px-4 py-2 font-medium text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 rounded-md;
-  }
-
-  .tech-input {
-    @apply bg-[#090b10] border border-border-subtle rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all;
-  }
-
-  .tech-label {
-    @apply text-xs text-slate-400 font-medium mb-1.5 block;
-  }
-
-  .data-value {
-    @apply font-mono text-primary bg-primary/5 px-1 rounded-sm;
+    @apply antialiased font-sans selection:bg-primary/20 text-slate-800 bg-white;
   }
 }
 

@@ -1,158 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { LayoutDashboard, Database, RefreshCw, Lock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-import QuorumValidator from './components/QuorumValidator';
-import AuditVault from './components/AuditVault';
-import ObservationTrigger from './components/ObservationTrigger';
-import NetworkVisual from './components/NetworkVisual';
-import logo from './assets/logo.svg';
-
-const API_KEY = 'connex_secret_mvp_2026';
-const API_BASE_URL = 'http://localhost:3001';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'x-api-key': API_KEY,
-    'Content-Type': 'application/json',
-  }
-});
+import React, { useState } from 'react';
+import DisputePortal from './pages/DisputePortal';
+import logo from './assets/connex-logo.svg';
 
 function App() {
-  const [evidence, setEvidence] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ health: 'checking...', vaultSecure: true });
-  const [appError, setAppError] = useState(null);
-
-  const syncVault = async () => {
-    try {
-      const response = await api.get('/vault');
-      setEvidence(response.data.blocks);
-      
-      const healthRes = await api.get('/health');
-      const verifyRes = await api.get('/vault/verify');
-      
-      setStats({
-        health: healthRes.data.status,
-        vaultSecure: verifyRes.data.valid,
-        traceCount: response.data.blocks?.length || 0
-      });
-    } catch (error) {
-      console.error('Failed to sync vault:', error);
-      setAppError('Vault sync failed: Connection to nodes lost.');
-      setStats(prev => ({ ...prev, health: 'OFFLINE', vaultSecure: false }));
-    }
-  };
-
-  useEffect(() => {
-    syncVault();
-    const interval = setInterval(syncVault, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleCaptureObservation = async (payload) => {
-    setLoading(true);
-    try {
-      await api.post('/observations', payload);
-      await syncVault();
-    } catch (error) {
-      setAppError('Failed to capture observation: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFlagDiscrepancy = async (status, reason) => {
-    if (evidence.length === 0) return;
-    const latestTraceId = evidence[0].tx_id;
-    setLoading(true);
-    try {
-      await api.patch(`/observations/${latestTraceId}/status`, { status, reason });
-      await syncVault();
-    } catch (error) {
-      setAppError('Failed to flag discrepancy: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [activeTab, setActiveTab] = useState('disputes');
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0b0e14] text-slate-300 antialiased font-sans">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-[#11141d] sticky top-0 z-50">
-        <div className="container mx-auto px-6 h-14 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased font-sans">
+      {/* Enterprise Header */}
+      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-             <img src={logo} alt="Connex" className="w-6 h-6" />
-             <div className="flex items-baseline space-x-2">
-                <span className="text-sm font-bold text-white">Connex Observer</span>
-                <span className="text-[10px] text-slate-600 font-medium">Digital CCTV Layer</span>
+             <img src={logo} alt="Cx Logo" className="w-8 h-8" />
+             <div className="flex flex-col justify-center">
+                <span className="text-sm font-bold text-slate-900 leading-tight">Connex Technologies</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider leading-tight">Enterprise Portal</span>
              </div>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-6 text-[13px] font-medium">
-             <a href="#" className="text-blue-500">Monitoring</a>
-             <a href="#" className="text-slate-400 hover:text-white transition-colors">Evidence Ledger</a>
-             <a href="#" className="text-slate-400 hover:text-white transition-colors">Network Health</a>
-             <a href="#" className="text-slate-400 hover:text-white transition-colors">Audit Logs</a>
+          <nav className="hidden md:flex items-center space-x-8 text-sm font-semibold">
+             <button 
+                onClick={() => setActiveTab('disputes')}
+                className={`transition-colors py-5 border-b-2 ${activeTab === 'disputes' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+             >
+               Dispute Resolution
+             </button>
+             <button 
+                onClick={() => setActiveTab('reports')}
+                className={`transition-colors py-5 border-b-2 ${activeTab === 'reports' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+             >
+               Audit Reports
+             </button>
+             <button 
+                onClick={() => setActiveTab('health')}
+                className={`transition-colors py-5 border-b-2 ${activeTab === 'health' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+             >
+               Network Health
+             </button>
           </nav>
 
           <div className="flex items-center space-x-4">
-             <div className="flex items-center text-[11px] font-medium">
-                <span className={`w-1.5 h-1.5 rounded-full mr-2 ${stats.vaultSecure ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                <span className={stats.vaultSecure ? 'text-emerald-500' : 'text-rose-500'}>
-                   {stats.vaultSecure ? 'Vault Secured' : 'Vault Compromised'}
-                </span>
+             <div className="hidden md:flex flex-col items-end">
+                <span className="text-xs font-bold text-slate-800">Bank Administrator</span>
+                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wide">● Secure Session</span>
              </div>
-             <button onClick={syncVault} className="p-1.5 text-slate-500 hover:text-white transition-colors">
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-             </button>
+             <div className="h-8 w-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-600 font-bold text-xs">
+               BA
+             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto px-6 py-8 space-y-8">
-        <AnimatePresence>
-          {appError && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0 }}
-              className="bg-rose-500/10 border border-rose-500/20 text-rose-500 px-4 py-3 rounded-md text-sm flex justify-between items-center"
-            >
-              <span>{appError}</span>
-              <button onClick={() => setAppError(null)} className="text-rose-500 hover:text-white">&times;</button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <NetworkVisual />
-        
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          <div className="xl:col-span-3 space-y-8">
-            <QuorumValidator blocks={evidence} />
-            <AuditVault blocks={evidence} />
-          </div>
-
-          <div className="xl:col-span-1">
-            <ObservationTrigger 
-              onPostEvent={handleCaptureObservation} 
-              onUpdateStatus={handleFlagDiscrepancy}
-              loading={loading}
-            />
-          </div>
-        </div>
+      {/* Main Content Area */}
+      <main className="flex-grow">
+        {activeTab === 'disputes' && <DisputePortal />}
+        {activeTab === 'reports' && (
+           <div className="container mx-auto px-6 py-12 text-center text-slate-500">
+             <p className="text-lg font-medium">Audit Reports Module Placeholder</p>
+             <p className="text-sm mt-2">Generate PDF compliance reports for standard regulatory audits.</p>
+           </div>
+        )}
+        {activeTab === 'health' && (
+           <div className="container mx-auto px-6 py-12 text-center text-slate-500">
+             <p className="text-lg font-medium">Network Infrastructure Monitoring</p>
+             <p className="text-sm mt-2">View latency and uptime for Witness Nodes (AWS, GCP, Azure).</p>
+           </div>
+        )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8 bg-[#0b0e14]">
-         <div className="container mx-auto px-6 flex flex-wrap items-center justify-between text-slate-600 text-[11px] font-medium gap-4">
-            <div>&copy; 2026 Connex Technologies. Built for Kenya-Uganda Financial Corridor.</div>
-            <div className="flex items-center space-x-6 text-slate-500">
-                <span>Compliance: ISO 20022</span>
-                <span>System Status: {stats.health}</span>
+      {/* Enterprise Footer */}
+      <footer className="border-t border-slate-200 py-6 bg-white">
+         <div className="container mx-auto px-6 flex flex-wrap items-center justify-between text-slate-500 text-[11px] font-medium gap-4">
+            <div>&copy; 2026 Connex Technologies. Infrastructure for Kenyan Financial Corridors.</div>
+            <div className="flex items-center space-x-6">
+                <span>ISO 20022 Compliant</span>
+                <span>PCI-DSS Tier 1 Status: Verified</span>
             </div>
          </div>
       </footer>

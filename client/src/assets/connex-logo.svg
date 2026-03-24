@@ -1,0 +1,7 @@
+<svg xmlns="http://www.svg.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- The 'C' as a thick incomplete circle -->
+  <path d="M 70,20 A 40,40 0 1,0 70,80" fill="none" stroke="#111827" stroke-width="14" stroke-linecap="round" />
+  <!-- The 'x' on the right side -->
+  <line x1="60" y1="40" x2="90" y2="70" stroke="#111827" stroke-width="12" stroke-linecap="round" />
+  <line x1="90" y1="40" x2="60" y2="70" stroke="#111827" stroke-width="12" stroke-linecap="round" />
+</svg>
