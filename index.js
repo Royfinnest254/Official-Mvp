@@ -8,6 +8,7 @@ const observationRoutes = require('./routes/observations');
 const vaultRoutes = require('./routes/vault');
 const healthRoutes = require('./routes/health');
 const transactionRoutes = require('./routes/transactions');
+const eventsRoutes = require('./routes/events'); // [NEW] PRD Gateway Route
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +35,9 @@ app.use('/health', healthRoutes);
 app.use('/observations', authenticate, observationRoutes);
 app.use('/vault', authenticate, vaultRoutes);
 app.use('/tx', authenticate, transactionRoutes);
+
+// [NEW] PRD v0.1 Endpoints
+app.use('/v1/events', eventsRoutes);
 
 // Root Route (Premium Welcome message)
 app.get('/', (req, res) => {
