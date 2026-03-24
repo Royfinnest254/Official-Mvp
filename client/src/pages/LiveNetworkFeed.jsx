@@ -18,6 +18,7 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
   const [recentTx, setRecentTx] = useState([]);
   const [stats, setStats] = useState({ total: 0, disputes: 0, tps: 5.0 });
   const [newIds, setNewIds] = useState(new Set());
+  const [filterMode, setFilterMode] = useState('ALL'); // 'ALL' or 'DISPUTES'
   const prevIdsRef = useRef(new Set());
 
   useEffect(() => {
@@ -86,13 +87,22 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Events Processed</p>
               <p className="text-2xl font-bold text-slate-800 tabular-nums">{stats.total.toLocaleString()}</p>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-lg px-5 py-3">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Disputes Detected</p>
+            <button 
+              onClick={() => setFilterMode(filterMode === 'DISPUTES' ? 'ALL' : 'DISPUTES')}
+              className={`text-left rounded-lg px-5 py-3 transition-all ${
+                filterMode === 'DISPUTES' 
+                ? 'bg-red-50 border-2 border-red-500 ring-4 ring-red-50/50 shadow-md' 
+                : 'bg-slate-50 border border-slate-200 hover:border-red-300 hover:bg-red-50/30'
+              }`}
+            >
+              <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${filterMode === 'DISPUTES' ? 'text-red-600' : 'text-slate-400'}`}>
+                {filterMode === 'DISPUTES' ? 'Filtering: Disputes' : 'Total Disputes Detected'}
+              </p>
               <div className="flex items-center gap-2">
-                <p className="text-2xl font-bold text-red-600 tabular-nums">{stats.disputes}</p>
-                {stats.disputes > 0 && <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />}
+                <p className={`text-2xl font-bold tabular-nums ${filterMode === 'DISPUTES' ? 'text-red-700' : 'text-red-600'}`}>{stats.disputes}</p>
+                <AlertTriangle className={`w-4 h-4 ${filterMode === 'DISPUTES' ? 'text-red-600 animate-bounce' : 'text-red-500 animate-pulse'}`} />
               </div>
-            </div>
+            </button>
             <div className="bg-slate-50 border border-slate-200 rounded-lg px-5 py-3">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Throughput (TPS)</p>
               <div className="flex items-center gap-2">
@@ -138,8 +148,10 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
                     </td>
                   </tr>
                 )}
-                <AnimatePresence>
-                  {recentTx.map((tx) => {
+                <AnimatePresence mode="popLayout">
+                  {recentTx
+                    .filter(tx => filterMode === 'ALL' || tx.event_type === 'REJECT' || tx.event_type === 'DISPUTE')
+                    .map((tx) => {
                     const isDisputed = tx.event_type === 'REJECT' || tx.event_type === 'DISPUTE';
                     const isNew = newIds.has(tx.id);
                     return (
