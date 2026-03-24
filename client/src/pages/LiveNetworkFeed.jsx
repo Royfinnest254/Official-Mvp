@@ -23,8 +23,15 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
   useEffect(() => {
     const fetchRecent = async () => {
       try {
+        // 1. Fetch recent events for the table
         const res = await api.get('/tx/recent');
         const evts = res.data.events || [];
+        
+        // 2. Fetch global dispute count from Supabase (Real stats)
+        // Note: For the prototype we treat all REJECTs as the global count
+        const statsRes = await api.get('/tx/recent?limit=1000'); // Get a larger sample for stats
+        const allEvts = statsRes.data.events || [];
+        const globalDisputes = allEvts.filter(e => e.event_type === 'REJECT' || e.event_type === 'DISPUTE').length;
         
         // Detect newly arrived transactions for slide-in animation
         const currentIds = new Set(evts.map(e => e.id));
@@ -43,10 +50,9 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
         setRecentTx(evts);
         
         // Compute stats
-        const disputeCount = evts.filter(e => e.event_type === 'REJECT' || e.event_type === 'DISPUTE').length;
         setStats({
           total: evts.length > 0 ? evts[0].id : 0,
-          disputes: disputeCount,
+          disputes: globalDisputes,
           tps: 5.0,
         });
       } catch (err) {
@@ -81,7 +87,7 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
               <p className="text-2xl font-bold text-slate-800 tabular-nums">{stats.total.toLocaleString()}</p>
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-lg px-5 py-3">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Active Disputes</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Disputes Detected</p>
               <div className="flex items-center gap-2">
                 <p className="text-2xl font-bold text-red-600 tabular-nums">{stats.disputes}</p>
                 {stats.disputes > 0 && <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />}
