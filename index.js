@@ -4,9 +4,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 
+const observationRoutes = require('./routes/observations');
+const vaultRoutes = require('./routes/vault');
 const healthRoutes = require('./routes/health');
-const eventRoutes = require('./routes/events');
-const chainRoutes = require('./routes/chain');
 const transactionRoutes = require('./routes/transactions');
 
 const app = express();
@@ -30,9 +30,9 @@ const authenticate = (req, res, next) => {
 // Public Routes
 app.use('/health', healthRoutes);
 
-// Protected Routes
-app.use('/events', authenticate, eventRoutes);
-app.use('/chain', authenticate, chainRoutes);
+// Protected Audit Routes
+app.use('/observations', authenticate, observationRoutes);
+app.use('/vault', authenticate, vaultRoutes);
 app.use('/tx', authenticate, transactionRoutes);
 
 // Root Route (Premium Welcome message)

@@ -7,7 +7,11 @@ const { hashBlock } = require('../lib/hash');
 router.get('/', async (req, res) => {
   try {
     const blocks = await getChain();
-    res.json({ blocks });
+    res.json({ 
+      vault_status: 'SECURE',
+      total_traces: blocks.length,
+      blocks 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

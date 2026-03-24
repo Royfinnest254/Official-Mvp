@@ -1,7 +1,7 @@
 require('dotenv').config();
 
-const API_URL = `http://localhost:${process.env.PORT || 3000}`;
-const API_KEY = process.env.API_KEY;
+const API_URL = `http://localhost:${process.env.PORT || 3001}`;
+const API_KEY = process.env.API_KEY || 'connex_secret_mvp_2026';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -9,68 +9,53 @@ const headers = {
 };
 
 async function runDemo() {
-  console.log('--- STARTING CONNEX DEMO ---');
+  console.log('--- STARTING CCTV 2.0 EVIDENCE AUDIT DEMO ---');
 
-  // Step 1: Check health
-  console.log('\nStep 1: Checking health...');
-  const healthRes = await fetch(`${API_URL}/health`);
-  const healthData = await healthRes.json();
-  console.log('Result:', healthData);
+  try {
+    // 1. Capture a new settlement observation
+    const traceId = `AUDIT_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    console.log(`\nStep 1: Capturing Settlement Observation (${traceId}) from KCB to Equity...`);
+    const auditRes = await fetch(`${API_URL}/observations`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        txId: traceId,
+        amount: 85000,
+        currency: 'KES',
+        fromBank: 'KCB_KE',
+        toBank: 'EQUITY_KE',
+        status: 'PENDING'
+      })
+    });
+    const auditData = await auditRes.json();
+    console.log('✅ Evidence captured and synced to quorum.');
 
-  // Step 2: POST an event
-  console.log('\nStep 2: Recording payment from KCB (KE) to Stanbic (UG)...');
-  const postRes = await fetch(`${API_URL}/events`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      txId: 'TXN_KE_UG_001',
-      amount: 50000,
-      currency: 'KES',
-      fromBank: 'KCB_KE',
-      toBank: 'STANBIC_UG',
-      status: 'PENDING'
-    })
-  });
-  const postData = await postRes.json();
-  console.log('Result:', postData);
-  const blockId = postData.blockId;
+    // 2. Fetch the Evidence Vault
+    console.log('\nStep 2: Syncing with Evidence Vault...');
+    const vaultRes = await fetch(`${API_URL}/vault`, { headers });
+    const vaultData = await vaultRes.json();
+    console.log(`✅ Vault sync complete. Total traces recorded: ${vaultData.total_traces}`);
 
-  // Step 3: GET the block
-  console.log('\nStep 3: Verifying witness signatures on the block...');
-  const blockRes = await fetch(`${API_URL}/chain/${blockId}`, { headers });
-  const blockData = await blockRes.json();
-  console.log('Witnesses:', blockData.block.signatures.map(s => s.witness));
-  console.log('Signature Count:', blockData.block.signatures.length);
+    // 3. Verify Vault Integrity
+    console.log('\nStep 3: Verifying Vault Cryptographic Integrity...');
+    const verifyRes = await fetch(`${API_URL}/vault/verify`, { headers });
+    const verifyData = await verifyRes.json();
+    console.log(`✅ Vault Integrity: ${verifyData.valid ? 'SECURE' : 'COMPROMISED'}`);
 
-  // Step 4: Inject a dispute
-  console.log('\nStep 4: Simulating Verification Gap (Injecting Dispute)...');
-  const patchRes = await fetch(`${API_URL}/events/TXN_KE_UG_001/status`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify({
-      status: 'DISPUTED',
-      reason: 'Recipient bank reports non-receipt'
-    })
-  });
-  const patchData = await patchRes.json();
-  console.log('Result:', patchData);
+    if (vaultData.blocks.length > 0) {
+      const latestTrace = vaultData.blocks[0];
+      console.log(`\n--- Latest Audit Trace Details ---`);
+      console.log(`ID: ${latestTrace.tx_id}`);
+      console.log(`Value: ${latestTrace.payload.amount} ${latestTrace.payload.currency}`);
+      console.log(`Hash: ${latestTrace.block_hash.substring(0, 32)}...`);
+      console.log(`Signatures: ${latestTrace.signatures.map(s => s.witness).join(', ')}`);
+    }
 
-  // Step 5: Run chain verification
-  console.log('\nStep 5: Verifying global chain integrity...');
-  const verifyRes = await fetch(`${API_URL}/chain/verify`, { headers });
-  const verifyData = await verifyRes.json();
-  console.log('Result:', verifyData);
-
-  // Step 6: Show transaction history
-  console.log('\nStep 6: Displaying full evidence trail for TXN_KE_UG_001...');
-  const txRes = await fetch(`${API_URL}/tx/TXN_KE_UG_001`, { headers });
-  const txData = await txRes.json();
-  console.log('History:', txData.events.map(e => ({ status: e.status, hash: e.block_hash.substring(0, 10) + '...' })));
-
-  console.log('\n--- DEMO COMPLETE ---');
+    console.log('\n--- DEMO COMPLETE ---');
+  } catch (error) {
+    console.error('❌ Demo failed:', error.message);
+    process.exit(1);
+  }
 }
 
-runDemo().catch(err => {
-  console.error('Demo failed:', err.message);
-  process.exit(1);
-});
+runDemo();

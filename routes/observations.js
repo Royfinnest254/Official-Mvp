@@ -32,6 +32,7 @@ router.post('/', async (req, res) => {
     });
 
     res.status(201).json({
+      message: 'Settlement observation successfully sealed and synced',
       blockId: newBlock.id,
       hash: newBlock.block_hash,
       timestamp: newBlock.created_at,
