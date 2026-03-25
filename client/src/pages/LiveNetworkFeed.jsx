@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Server, Activity, ArrowRight, ShieldAlert, CheckCircle2, Zap, AlertTriangle, Clock, Cloud } from 'lucide-react';
+import { Activity, ArrowRight, ShieldAlert, CheckCircle2, Zap, AlertTriangle, Clock } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
 const API_BASE_URL = 'https://official-mvp.onrender.com';
@@ -21,12 +21,6 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
   const [filterMode, setFilterMode] = useState('ALL'); 
   const [error, setError] = useState(null);
   const prevIdsRef = useRef(new Set());
-
-  const [nodes, setNodes] = useState([
-    { id: 1, provider: 'Render (Oregon)', status: 'ACTIVE', lastSigned: '0.2s', latency: '42ms' },
-    { id: 2, provider: 'Render (Frankfurt)', status: 'DEGRADED', timeouts: 847, quorum: 'HELD' },
-    { id: 3, provider: 'Render (Singapore)', lastSigned: '0.2s', status: 'ACTIVE', latency: '61ms' },
-  ]);
 
   useEffect(() => {
     const fetchRecent = async () => {
@@ -61,22 +55,9 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
       }
     };
     
-    const nodeInterval = setInterval(() => {
-      setNodes(prev => prev.map(n => {
-        if (n.id === 2) {
-          return { ...n, timeouts: n.timeouts + (Math.random() > 0.8 ? 1 : 0) };
-        }
-        const rand = (Math.random() * 0.4).toFixed(1);
-        return { ...n, lastSigned: `${rand}s ago`, latency: `${Math.floor(Math.random() * 20 + 40)}ms` };
-      }));
-    }, 800);
-
     fetchRecent();
     const interval = setInterval(fetchRecent, 2000);
-    return () => {
-      clearInterval(interval);
-      clearInterval(nodeInterval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -139,64 +120,6 @@ export default function LiveNetworkFeed({ onNavigateToDispute }) {
                 </span>
                 LIVE
               </div>
-            </div>
-          </div>
-
-          {/* Witness Node Topology */}
-          <div className="mt-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Server className="w-4 h-4 text-slate-400" />
-              <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Witness Node Topology</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {nodes.map(node => (
-                <div key={node.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${node.status === 'ACTIVE' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'}`}>
-                        <Cloud className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800">Node {node.id}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">{node.provider}</p>
-                      </div>
-                    </div>
-                    <div>
-                      {node.status === 'ACTIVE' ? (
-                        <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold border border-emerald-100 uppercase">
-                          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                          Active
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-50 text-amber-600 text-[9px] font-bold border border-amber-100 uppercase">
-                          <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                          Degraded
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 border-t border-slate-200 pt-3">
-                    <div>
-                      <p className="text-[9px] text-slate-400 uppercase font-bold mb-0.5">
-                        {node.id === 2 ? 'Timeouts' : 'Last Signed'}
-                      </p>
-                      <p className="text-sm font-mono font-bold text-slate-700">
-                        {node.id === 2 ? node.timeouts : node.lastSigned}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[9px] text-slate-400 uppercase font-bold mb-0.5">
-                        {node.id === 2 ? 'Quorum' : 'Latency'}
-                      </p>
-                      <p className={`text-sm font-mono font-bold ${node.id === 2 ? 'text-emerald-600' : 'text-slate-500'}`}>
-                        {node.id === 2 ? node.quorum : node.latency}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
