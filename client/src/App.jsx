@@ -1,15 +1,17 @@
+```javascript
 import React, { useState } from 'react';
-import DisputePortal from './pages/DisputePortal';
-import LiveNetworkFeed from './pages/LiveNetworkFeed';
+import AuditReports from './pages/AuditReports';
+import HowItWorks from './pages/HowItWorks';
+import AuditVaultPage from './pages/AuditVaultPage';
 import logo from './assets/connex-logo.png';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('disputes');
+  const [activeTab, setActiveTab] = useState('process'); // Default to Process for newcomers
   const [initialTxId, setInitialTxId] = useState('');
 
   const navigateToDispute = (txId) => {
     setInitialTxId(txId);
-    setActiveTab('disputes');
+    setActiveTab('disputes'); // This tab might be renamed or removed in a future iteration
   };
 
   return (
@@ -40,19 +42,22 @@ function App() {
              </button>
              <button 
                 onClick={() => setActiveTab('reports')}
-                className={`px-4 transition-colors py-5 border-b-2 ${activeTab === 'reports' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'reports' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
              >
-               Audit Reports
+               Evidence Vault
              </button>
           </nav>
 
           <div className="flex items-center space-x-4">
              <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs font-bold text-slate-800">Bank Administrator</span>
-                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wide">● Secure Session</span>
+                <span className="text-xs font-bold text-slate-800">Operational Admin</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">System Secure</span>
+                </div>
              </div>
-             <div className="h-8 w-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-600 font-bold text-xs">
-               BA
+             <div className="h-9 w-9 rounded-xl bg-blue-600 shadow-lg shadow-blue-100 flex items-center justify-center text-white font-black text-xs">
+               RC
              </div>
           </div>
         </div>
@@ -60,14 +65,10 @@ function App() {
 
       {/* Main Content Area */}
       <main className="flex-grow">
+        {activeTab === 'process' && <HowItWorks />}
         {activeTab === 'disputes' && <DisputePortal initialTxId={initialTxId} />}
         {activeTab === 'health' && <LiveNetworkFeed onNavigateToDispute={navigateToDispute} />}
-        {activeTab === 'reports' && (
-           <div className="container mx-auto px-6 py-12 text-center text-slate-500">
-             <p className="text-lg font-medium">Audit Reports Module</p>
-             <p className="text-sm mt-2">Generate PDF compliance reports for standard regulatory audits.</p>
-           </div>
-        )}
+        {activeTab === 'reports' && <AuditVaultPage />}
       </main>
 
       {/* Enterprise Footer */}

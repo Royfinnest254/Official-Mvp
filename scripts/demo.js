@@ -13,18 +13,24 @@ async function runDemo() {
 
   try {
     // 1. Capture a new settlement observation
-    const traceId = `AUDIT_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    console.log(`\nStep 1: Capturing Settlement Observation (${traceId}) from KCB to Equity...`);
+    const traceId = `UETR-${crypto.randomUUID().toUpperCase()}`;
+    console.log(`\nStep 1: Vaulting ISO 20022 Payload (${traceId})...`);
     const auditRes = await fetch(`${API_URL}/observations`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         txId: traceId,
-        amount: 85000,
+        amount: Math.floor(Math.random() * 50000) + 10000,
         currency: 'KES',
-        fromBank: 'KCB_KE',
-        toBank: 'EQUITY_KE',
-        status: 'PENDING'
+        fromBank: 'KCB_NRE_HQ',
+        toBank: 'EQUITY_HQ_MSA',
+        status: 'SEALED',
+        metadata: {
+          endToEndId: `REF-${Math.floor(Math.random() * 999999)}`,
+          instructionId: `INS-${Math.floor(Math.random() * 999999)}`,
+          purposeCode: 'SALA',
+          clearingSystem: 'KEPS'
+        }
       })
     });
     const auditData = await auditRes.json();
