@@ -13,7 +13,7 @@ const AuditVault = ({ blocks = [] }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-semibold text-slate-400">Evidence Audit Vault</h2>
+        <h2 className="text-sm font-semibold text-slate-400">CONNEX EVIDENCE VAULT</h2>
         <span className="text-[11px] font-medium text-slate-600">Vault Integrity: Secured</span>
       </div>
 

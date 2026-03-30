@@ -61,21 +61,21 @@ const NetworkVisual = () => {
             animate={{ scale: 1.5, opacity: 0 }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          <text y="45" textAnchor="middle" fill="#10b981" className="text-[11px] font-bold uppercase tracking-wider">Audit Vault</text>
+          <text y="45" textAnchor="middle" fill="#10b981" className="text-[11px] font-bold uppercase tracking-wider">CONNEX</text>
           <text y="58" textAnchor="middle" fill="#475569" className="text-[9px] font-medium tracking-tight">Passive Evidence Accumulator</text>
         </g>
 
         {/* Bank A (Top Left) */}
         <g transform="translate(200, 80)">
           <circle r="18" fill="#11141d" stroke="#334155" strokeWidth="2" />
-          <text y="-30" textAnchor="middle" fill="#f8fafc" className="text-[11px] font-bold">Institution A (KCB)</text>
+          <text y="-30" textAnchor="middle" fill="#f8fafc" className="text-[11px] font-bold">Bank A</text>
           <text y="-42" textAnchor="middle" fill="#475569" className="text-[9px] font-medium uppercase tracking-tighter">Observation Point</text>
         </g>
 
         {/* Bank B (Top Right) */}
         <g transform="translate(600, 80)">
           <circle r="18" fill="#11141d" stroke="#334155" strokeWidth="2" />
-          <text y="-30" textAnchor="middle" fill="#f8fafc" className="text-[11px] font-bold">Institution B (Equity)</text>
+          <text y="-30" textAnchor="middle" fill="#f8fafc" className="text-[11px] font-bold">Bank B</text>
           <text y="-42" textAnchor="middle" fill="#475569" className="text-[9px] font-medium uppercase tracking-tighter">Observation Point</text>
         </g>
 

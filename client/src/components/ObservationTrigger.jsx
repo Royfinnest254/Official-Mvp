@@ -43,9 +43,9 @@ const ObservationTrigger = ({ onPostEvent, onUpdateStatus, loading }) => {
                 onChange={(e) => setFromBank(e.target.value)}
                 className="tech-input w-full appearance-none"
               >
-                <option value="KCB_KE">KCB Bank</option>
-                <option value="EQUITY_KE">Equity Bank</option>
-                <option value="COOP_KE">Co-op Bank</option>
+                <option value="KCB_KE">Bank A</option>
+                <option value="EQUITY_KE">Bank B</option>
+                <option value="COOP_KE">Bank C</option>
               </select>
             </div>
             <div className="space-y-1">
@@ -55,9 +55,9 @@ const ObservationTrigger = ({ onPostEvent, onUpdateStatus, loading }) => {
                 onChange={(e) => setToBank(e.target.value)}
                 className="tech-input w-full appearance-none"
               >
-                <option value="EQUITY_KE">Equity Bank</option>
-                <option value="COOP_KE">Co-op Bank</option>
-                <option value="STANBIC_KE">Stanbic Bank</option>
+                <option value="EQUITY_KE">Bank B</option>
+                <option value="COOP_KE">Bank C</option>
+                <option value="STANBIC_KE">Bank D</option>
               </select>
             </div>
           </div>
@@ -77,7 +77,7 @@ const ObservationTrigger = ({ onPostEvent, onUpdateStatus, loading }) => {
             disabled={loading}
             className="w-full mt-4 tech-button bg-primary text-white font-semibold py-2.5 hover:bg-blue-600 transition-colors shadow-sm text-[10px]"
           >
-            {loading ? <RefreshCw className="animate-spin inline mr-2" size={14} /> : 'Sync to Audit Vault'}
+            {loading ? <RefreshCw className="animate-spin inline mr-2" size={14} /> : 'Sync to CONNEX'}
           </button>
         </form>
       </div>

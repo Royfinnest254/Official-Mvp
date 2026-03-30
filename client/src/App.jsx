@@ -1,5 +1,6 @@
-```javascript
 import React, { useState } from 'react';
+import DisputePortal from './pages/DisputePortal';
+import LiveNetworkFeed from './pages/LiveNetworkFeed';
 import AuditReports from './pages/AuditReports';
 import HowItWorks from './pages/HowItWorks';
 import AuditVaultPage from './pages/AuditVaultPage';
@@ -11,7 +12,7 @@ function App() {
 
   const navigateToDispute = (txId) => {
     setInitialTxId(txId);
-    setActiveTab('disputes'); // This tab might be renamed or removed in a future iteration
+    setActiveTab('disputes');
   };
 
   return (
@@ -19,26 +20,32 @@ function App() {
       {/* Enterprise Header */}
       <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('process')}>
              <img src={logo} alt="Connex Cx Logo" className="h-9 w-auto" />
              <div className="flex flex-col justify-center">
-                <span className="text-sm font-bold text-slate-900 leading-tight tracking-tight">CONNEX Technologies</span>
-                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider leading-tight">Enterprise Coordination Portal</span>
+                <span className="text-sm font-black text-slate-900 leading-tight tracking-tight uppercase italic">Connex</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight">Evidence Layer v1.0</span>
              </div>
           </div>
 
           <nav className="hidden md:flex items-center space-x-1 text-sm font-semibold">
              <button 
-                onClick={() => setActiveTab('disputes')}
-                className={`px-4 transition-colors py-5 border-b-2 ${activeTab === 'disputes' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+                onClick={() => setActiveTab('process')}
+                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'process' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
              >
-               Dispute Resolution
+               How it Works
              </button>
              <button 
                 onClick={() => setActiveTab('health')}
-                className={`px-4 transition-colors py-5 border-b-2 ${activeTab === 'health' ? 'text-blue-700 border-blue-700' : 'text-slate-500 hover:text-slate-800 border-transparent'}`}
+                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'health' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
              >
-               Live Network Feed
+               Live Network
+             </button>
+             <button 
+                onClick={() => setActiveTab('disputes')}
+                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'disputes' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
+             >
+               Dispute Resolution
              </button>
              <button 
                 onClick={() => setActiveTab('reports')}

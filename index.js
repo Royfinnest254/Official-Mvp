@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 
 const observationRoutes = require('./routes/observations');
 const vaultRoutes = require('./routes/vault');
@@ -46,7 +47,7 @@ app.use('/v1/events', eventsRoutes);
 app.get('/ping', (req, res) => res.send('pong'));
 
 // Root Route (Premium Welcome message)
-app.get('/', (req, res) => {
+app.get('/api/welcome', (req, res) => {
   res.send(`
     <div style="font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
       <h1 style="font-size: 3rem; margin-bottom: 1rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CONNEX MVP</h1>
@@ -56,6 +57,14 @@ app.get('/', (req, res) => {
       </div>
     </div>
   `);
+});
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, 'client/dist')));
+
+// THE KEY CHANGE: Catch-all route for any frontend page (SPA routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
 app.listen(PORT, () => {

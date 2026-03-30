@@ -60,7 +60,7 @@ export default function AuditVaultPage() {
           <div>
             <h1 className="text-2xl font-black tracking-tighter flex items-center gap-3">
               <Database className="text-blue-500 w-6 h-6" />
-              EVIDENCE AUDIT VAULT
+              CONNEX EVIDENCE VAULT
             </h1>
             <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mt-1">
               Autonomous Post-Facto Preservation Layer
