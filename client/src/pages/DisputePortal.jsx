@@ -4,7 +4,7 @@ import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle, Copy, Ch
 
 const API_KEY = 'connex_secret_mvp_2026';
 // We are querying the production cloud directly!
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://official-mvp-production.up.railway.app';
+const API_BASE_URL = 'https://official-mvp-production.up.railway.app';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
