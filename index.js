@@ -85,7 +85,7 @@ app.get('/test-nodes', async (req, res) => {
 });
 
 // THE KEY CHANGE: Catch-all route for any frontend page (SPA routing)
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
