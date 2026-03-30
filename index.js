@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 // Security and Logging Middleware
 app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP for PoC to prevent frontend blocks
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: false // Disable CORP to allow Vercel frontend to fetch
 }));
 app.use(cors());
 app.use(morgan('dev'));
@@ -84,11 +84,18 @@ app.get('/test-nodes', async (req, res) => {
   res.json({ environment: process.env.NODE_ENV, results });
 });
 
-// Deprecated: Placeholder Home Route replaced by React Frontend
-// app.get('/', (req, res) => { ... });
-
 // Catch-all route for React Router (must be the last route before app.listen)
 app.get('*', (req, res) => {
+  // If React isn't built, fallback to API welcome
+  if (!require('fs').existsSync(path.join(__dirname, 'client/dist/index.html'))) {
+    return res.send(`
+      <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
+        <h1>CONNEX Gateway</h1>
+        <p>Backend is ONLINE and Healthy. (React Frontend is running on Vercel)</p>
+        <a href="/test-nodes">Run Diagnostics</a>
+      </div>
+    `);
+  }
   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
