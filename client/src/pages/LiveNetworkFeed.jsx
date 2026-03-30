@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, ArrowRight, ShieldAlert, CheckCircle2, Zap, AlertTriangle, Clock } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
-const API_BASE_URL = 'https://official-mvp.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://official-mvp-production.up.railway.app';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
