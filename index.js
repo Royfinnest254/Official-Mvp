@@ -84,6 +84,17 @@ app.get('/test-nodes', async (req, res) => {
   res.json({ environment: process.env.NODE_ENV, results });
 });
 
+// Home Route (Satisfies Railway Health Check)
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
+      <h1>CONNEX Gateway</h1>
+      <p>Backend is ONLINE and Healthy.</p>
+      <a href="/test-nodes">Run Diagnostics</a>
+    </div>
+  `);
+});
+
 app.listen(PORT, () => {
   console.log(`CONNEX API is live on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
