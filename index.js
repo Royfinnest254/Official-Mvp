@@ -67,6 +67,28 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
+// [DEBUG] Diagnostic Node Test Route
+app.get('/test-nodes', async (req, res) => {
+  const axios = require('axios');
+  const urls = [process.env.NODE_1_URL, process.env.NODE_2_URL, process.env.NODE_3_URL];
+  const results = [];
+  
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      if (!urls[i]) {
+        results.push({ node: i + 1, status: 'MISSING', url: 'NOT SET' });
+        continue;
+      }
+      const start = Date.now();
+      const response = await axios.get(urls[i].replace('/sign', ''), { timeout: 5000 });
+      results.push({ node: i + 1, status: 'ALIVE', latency: `${Date.now() - start}ms`, url: urls[i] });
+    } catch (err) {
+      results.push({ node: i + 1, status: 'ERROR', error: err.message, url: urls[i] || 'NOT SET' });
+    }
+  }
+  res.json({ environment: process.env.NODE_ENV, results });
+});
+
 app.listen(PORT, () => {
   console.log(`CONNEX API is live on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
