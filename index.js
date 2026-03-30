@@ -84,18 +84,15 @@ app.get('/test-nodes', async (req, res) => {
   res.json({ environment: process.env.NODE_ENV, results });
 });
 
-// Home Route (Satisfies Railway Health Check)
-app.get('/', (req, res) => {
-  res.send(`
-    <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
-      <h1>CONNEX Gateway</h1>
-      <p>Backend is ONLINE and Healthy.</p>
-      <a href="/test-nodes">Run Diagnostics</a>
-    </div>
-  `);
+// Deprecated: Placeholder Home Route replaced by React Frontend
+// app.get('/', (req, res) => { ... });
+
+// Catch-all route for React Router (must be the last route before app.listen)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`CONNEX API is live on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
 });
