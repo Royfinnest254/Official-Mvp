@@ -84,26 +84,6 @@ app.get('/test-nodes', async (req, res) => {
   res.json({ environment: process.env.NODE_ENV, results });
 });
 
-// THE KEY CHANGE: Catch-all route for any frontend page (SPA routing)
-// Express 5 requires a named parameter for wildcards
-app.get('/:splat*', (req, res) => {
-  const indexPath = path.join(__dirname, 'client/dist/index.html');
-  const fs = require('fs');
-  
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    // Fallback if frontend isn't built yet
-    res.send(`
-      <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
-        <h1>CONNEX Gateway</h1>
-        <p>Backend is ONLINE. Frontend build skipped for speed.</p>
-        <a href="/test-nodes">Run Diagnostics</a>
-      </div>
-    `);
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`CONNEX API is live on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
