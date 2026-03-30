@@ -62,11 +62,6 @@ app.get('/api/welcome', (req, res) => {
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, 'client/dist')));
 
-// THE KEY CHANGE: Catch-all route for any frontend page (SPA routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
-});
-
 // [DEBUG] Diagnostic Node Test Route
 app.get('/test-nodes', async (req, res) => {
   const axios = require('axios');
@@ -87,6 +82,11 @@ app.get('/test-nodes', async (req, res) => {
     }
   }
   res.json({ environment: process.env.NODE_ENV, results });
+});
+
+// THE KEY CHANGE: Catch-all route for any frontend page (SPA routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
 app.listen(PORT, () => {
