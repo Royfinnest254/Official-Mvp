@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import DisputePortal from './pages/DisputePortal';
 import LiveNetworkFeed from './pages/LiveNetworkFeed';
-import AuditReports from './pages/AuditReports';
-import HowItWorks from './pages/HowItWorks';
+// import AuditReports from './pages/AuditReports';
+// import HowItWorks from './pages/HowItWorks';
 import AuditVaultPage from './pages/AuditVaultPage';
 import logo from './assets/connex-logo.png';
 
@@ -72,7 +72,11 @@ function App() {
 
       {/* Main Content Area */}
       <main className="flex-grow">
-        {activeTab === 'process' && <HowItWorks />}
+        {activeTab === 'process' && (
+          <div className="p-12 text-center text-slate-500 font-medium">
+            How It Works documentation is currently being updated. Please view the Live Network.
+          </div>
+        )}
         {activeTab === 'disputes' && <DisputePortal initialTxId={initialTxId} />}
         {activeTab === 'health' && <LiveNetworkFeed onNavigateToDispute={navigateToDispute} />}
         {activeTab === 'reports' && <AuditVaultPage />}
