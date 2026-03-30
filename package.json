@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "start-witness": "node witness.js",
-    "build": "cd client && npm install && npm run build",
+    "build": "if [ \"$NODE_ID\" ]; then echo 'Skipping frontend build'; else (cd client && npm install && npm run build); fi",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
