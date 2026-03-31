@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "start-witness": "node witness.js",
+    "start-simulation": "node scripts/bank-simulation.js",
     "build": "npm install --prefix client && npm run build --prefix client",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

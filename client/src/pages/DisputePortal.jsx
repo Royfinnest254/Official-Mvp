@@ -87,70 +87,59 @@ export default function DisputePortal({ initialTxId }) {
   };
 
   return (
-    <div className="bg-background min-h-screen text-slate-300 pb-20 transition-colors duration-700">
-      {/* Background Glows */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[20%] right-[-10%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-secondary/5 rounded-full blur-[100px]"></div>
-      </div>
-
-      {/* Search Header */}
-      <div className="glass-header !static py-16 px-6">
-        <div className="max-w-4xl mx-auto relative">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10"
-          >
-            <h1 className="text-4xl font-black text-white mb-4 tracking-tighter uppercase italic">Resolution Center</h1>
-            <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.3em]">Verify the immutable cryptographic evidence layer</p>
-          </motion.div>
+    <div className="bg-slate-50 min-h-screen text-slate-900 pb-20 animate-in fade-in duration-700">
+      {/* Professional Search Header */}
+      <div className="bg-white border-b border-slate-200 py-16 px-6 shadow-sm">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full mb-6">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">Protocol Resolution Center</span>
+          </div>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4 tracking-tight">Forensic Evidence Retrieval</h1>
+          <p className="text-slate-500 font-medium text-sm max-w-xl mx-auto mb-10 leading-relaxed">Retrieve immutable coordination records from the federated witness layer for audit and dispute resolution.</p>
           
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-primary/50" />
+                <Search className="h-4 w-4 text-slate-400" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-14 pr-6 py-4 bg-surface/50 border border-white/10 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all shadow-2xl backdrop-blur-md"
+                className="block w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-medium"
                 placeholder="Enter Transaction ID (e.g. OQX123456)"
                 value={txId}
                 onChange={(e) => setTxId(e.target.value)}
               />
             </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
               disabled={loading}
-              className="px-10 py-4 bg-primary text-background font-black uppercase tracking-widest rounded-2xl hover:bg-primary/90 disabled:opacity-50 transition-all shadow-glow-blue whitespace-nowrap"
+              className="px-8 py-4 bg-slate-900 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all shadow-lg active:scale-95 whitespace-nowrap"
             >
-              {loading ? 'Decrypting...' : 'Verify Proof'}
-            </motion.button>
+              {loading ? 'Consulting Ledger...' : 'Verify Evidence'}
+            </button>
           </form>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="max-w-4xl mx-auto px-6 mt-12 relative z-10">
+      {/* Results Workspace */}
+      <div className="max-w-4xl mx-auto px-6 mt-12">
         
         {error && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-danger/10 border border-danger/20 p-5 rounded-2xl flex items-center gap-4"
-          >
-            <AlertCircle className="h-6 w-6 text-danger" />
-            <p className="text-sm font-bold text-danger uppercase tracking-wider">{error}</p>
-          </motion.div>
+          <div className="bg-red-50 border border-red-100 p-5 rounded-xl flex items-center gap-4 animate-in slide-in-from-top-2">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+            <p className="text-sm font-bold text-red-700 uppercase tracking-tight">{error}</p>
+          </div>
         )}
 
         {events.length > 0 && (
           <div className="space-y-10">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-               <h2 className="text-sm font-black text-white uppercase tracking-[0.2em]">Live Verification Report</h2>
-               <span className="text-[10px] font-mono text-slate-500 uppercase">{events.length} RECORD(S) FOUND</span>
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                 <Copy className="w-3.5 h-3.5 text-slate-400" />
+                 Forensic Proof Report
+               </h2>
+               <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">{events.length} SECURED EVENT(S)</span>
             </div>
             
             {events.map((event, index) => {
@@ -161,76 +150,72 @@ export default function DisputePortal({ initialTxId }) {
                const consensusMet = validCount >= 2;
 
                return (
-                <motion.div 
-                  key={event.id} 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="glass-panel group rounded-3xl glow-border overflow-hidden"
-                >
-                  {/* Event Header */}
-                  <div className="bg-white/5 px-8 py-5 flex justify-between items-center border-b border-white/5">
-                    <div className="flex items-center space-x-4">
-                      <span className="bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full border border-primary/20">
+                <div key={event.id} className="institution-card overflow-hidden">
+                  {/* Event Metadata Header */}
+                  <div className="bg-slate-50/80 px-8 py-4 flex justify-between items-center border-b border-slate-100">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${
+                        event.event_type === 'REJECT' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-blue-50 border-blue-100 text-blue-700'
+                      }`}>
                         {event.event_type}
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">ID: {event.bundle_id}</span>
+                      <span className="text-[10px] font-mono font-bold text-slate-400">INDEX: 0x{event.bundle_id.substring(0,6)}</span>
                     </div>
-                    <div className="flex items-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      <Clock className="w-3.5 h-3.5 mr-2 text-primary/50" />
+                    <div className="flex items-center text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                      <Clock className="w-3.5 h-3.5 mr-2" />
                       {new Date(parseInt(event.event_ts)).toLocaleString()}
                     </div>
                   </div>
 
-                  {/* Event Body */}
+                  {/* Evidence Body */}
                   <div className="p-8">
                     {/* The Official Verdict Section */}
-                    <div className={`mb-10 p-6 rounded-2xl border ${consensusMet ? 'bg-primary/5 border-primary/20 shadow-glow-blue' : 'bg-danger/5 border-danger/20'}`}>
-                       <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-4 flex items-center">
-                          <div className={`w-2 h-2 rounded-full mr-3 animate-pulse ${consensusMet ? 'bg-primary shadow-glow-blue' : 'bg-danger'}`}></div>
-                          Network Ledger Verdict
+                    <div className={`mb-10 p-6 rounded-xl border ${consensusMet ? 'bg-slate-900 border-slate-900' : 'bg-white border-red-200'}`}>
+                       <h3 className={`text-[10px] font-black uppercase tracking-widest mb-4 flex items-center ${consensusMet ? 'text-slate-400' : 'text-red-600'}`}>
+                          <div className={`w-2 h-2 rounded-full mr-3 ${consensusMet ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500 animate-pulse'}`}></div>
+                          Protocol Consensus Verdict
                        </h3>
-                       <p className="text-xl text-white font-medium leading-relaxed tracking-tight">
+                       <p className={`text-lg font-bold leading-relaxed tracking-tight ${consensusMet ? 'text-white' : 'text-red-900'}`}>
                          {consensusMet 
                            ? event.event_type === 'REJECT' || event.event_type === 'DISPUTE'
-                              ? `Consensus confirmed. Transaction FAILED on departure from ${event.institution_a} to ${event.institution_b}. Funds remain locked at source.`
-                              : `Consensus active. Funds successfully cleared ${event.institution_a} and were settled at ${event.institution_b}. Integrity verified.`
-                           : `UNABLE TO VERIFY. The witness quorum could not reach mathematical agreement. Escalation required.`}
+                              ? `Consensus Met. Transaction REJECTED during clearing from ${event.institution_a} to ${event.institution_b}. Payload integrity confirmed; rejection reason persists in vault index.`
+                              : `Consensus Met. Funds successfully processed from ${event.institution_a} to ${event.institution_b}. Witness signatures verified and ledger sealed.`
+                           : `INTEGRITY FAILURE. Quorum could not be reached. The mathematical proof for this event is incomplete.`}
                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-12 mb-10 text-center sm:text-left">
                       <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Origin</p>
-                        <p className="text-2xl font-black text-white tracking-tighter uppercase italic">{event.institution_a}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Debit Institution</p>
+                        <p className="text-2xl font-bold text-slate-900 tracking-tight uppercase">{event.institution_a}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Destination</p>
-                        <p className="text-2xl font-black text-white tracking-tighter uppercase italic">{event.institution_b}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Credit Institution</p>
+                        <p className="text-2xl font-bold text-slate-900 tracking-tight uppercase">{event.institution_b}</p>
                       </div>
                     </div>
 
-                    {/* Cryptographic Proof Section */}
-                    <div className="bg-surface/50 rounded-2xl border border-white/5 p-6 mb-8">
+                    {/* Technical Audit Section */}
+                    <div className="bg-slate-50/50 rounded-xl border border-slate-100 p-6 mb-8">
                       <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center uppercase tracking-widest text-[10px] font-black text-primary">
-                          <ShieldCheck className="w-4 h-4 mr-2" /> Proof Chain
+                        <div className="flex items-center uppercase tracking-widest text-[10px] font-black text-slate-900">
+                          <Server className="w-4 h-4 mr-2 text-slate-400" /> Evidence Bundle
                         </div>
-                        <div className="h-px bg-white/5 flex-grow mx-4"></div>
+                        <div className="h-px bg-slate-100 flex-grow mx-4"></div>
                       </div>
                       
                       <div className="space-y-4 font-mono text-[11px]">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                          <span className="w-32 flex-shrink-0 font-black text-slate-600 uppercase">TX REF:</span>
-                          <span className="text-slate-400 break-all">{event.tx_ref_hash}</span>
+                          <span className="w-32 flex-shrink-0 font-bold text-slate-400 uppercase">TX REF:</span>
+                          <span className="text-slate-600 truncate">{event.tx_ref_hash}</span>
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white/5 rounded-xl border border-white/5">
-                          <span className="w-32 flex-shrink-0 font-black text-primary uppercase">LEDGER HASH:</span>
-                          <span className="text-white font-black break-all">{event.chain_hash}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 py-2 px-3 bg-white border border-slate-200 rounded-lg">
+                          <span className="w-32 flex-shrink-0 font-bold text-slate-500 uppercase">Ledger Hash:</span>
+                          <span className="text-slate-900 font-bold truncate">{event.chain_hash}</span>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                          <span className="w-32 flex-shrink-0 font-black text-slate-600 uppercase">HISTORY:</span>
-                          <span className="text-slate-500 break-all">{event.prev_hash}</span>
+                          <span className="w-32 flex-shrink-0 font-bold text-slate-400 uppercase">Parent Hash:</span>
+                          <span className="text-slate-400 truncate">{event.prev_hash}</span>
                         </div>
                       </div>
                     </div>
@@ -238,56 +223,54 @@ export default function DisputePortal({ initialTxId }) {
                     {/* Witness Quorum Section */}
                     <div className="mb-10">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Witness Quorum (2-of-3)</h3>
-                        <div className="h-[2px] bg-white/5 flex-grow mx-4"></div>
-                        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${consensusMet ? 'bg-success/10 border-success/30 text-success' : 'bg-danger/10 border-danger/30 text-danger'}`}>
-                           {consensusMet ? 'VALID' : 'UNSECURED'}
+                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Independent Witness Signatures</h3>
+                        <div className="h-[1px] bg-slate-100 flex-grow mx-4"></div>
+                        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${consensusMet ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
+                           {consensusMet ? 'SIGNED' : 'UNSECURED'}
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
-                          { name: 'AWS Node', valid: node1Valid },
-                          { name: 'GCP Node', valid: node2Valid },
-                          { name: 'Azure Node', valid: node3Valid }
+                          { name: 'Connex-AWS-01', valid: node1Valid },
+                          { name: 'Connex-GCP-02', valid: node2Valid },
+                          { name: 'Connex-AZ-03', valid: node3Valid }
                         ].map((node, i) => (
-                           <div key={i} className={`p-4 rounded-2xl border transition-all flex items-center justify-between ${node.valid ? 'bg-success/5 border-success/20' : 'bg-surface border-white/5'}`}>
-                              <div className="flex items-center text-xs font-bold text-slate-400">
-                                <Server className={`w-3.5 h-3.5 mr-3 ${node.valid ? 'text-success' : 'text-slate-600'}`} />
+                           <div key={i} className={`p-4 rounded-xl border flex items-center justify-between transition-all ${node.valid ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100'}`}>
+                              <div className="flex items-center text-xs font-bold text-slate-600">
+                                <Server className={`w-3.5 h-3.5 mr-3 ${node.valid ? 'text-blue-600' : 'text-slate-300'}`} />
                                 {node.name}
                               </div>
-                              {node.valid ? <CheckCircle2 className="w-4 h-4 text-success" /> : <div className="w-2 h-2 rounded-full bg-slate-800"></div>}
+                              {node.valid ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Clock className="w-3.5 h-3.5 text-slate-200" />}
                            </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Copy Proof Bundle Button */}
-                    <div className="flex justify-end">
-                       <motion.button
-                         whileHover={{ scale: 1.05 }}
-                         whileTap={{ scale: 0.95 }}
+                    {/* Action Footer */}
+                    <div className="flex justify-end pt-6 border-t border-slate-100">
+                       <button
                          onClick={() => copyProofBundle(event)}
-                         className="inline-flex items-center gap-3 px-8 py-3 bg-white text-background text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-2xl"
+                         className="inline-flex items-center gap-3 px-8 py-3 bg-white border border-slate-200 text-slate-900 text-xs font-bold uppercase tracking-widest rounded-lg hover:border-slate-900 transition-all active:scale-95 shadow-sm"
                        >
-                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                         {copied ? 'Proof Copied' : 'Extract Proof Bundle'}
-                       </motion.button>
+                         {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-slate-400" />}
+                         {copied ? 'Proof Copied' : 'Download Forensic Proof'}
+                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
                );
             })}
           </div>
         )}
         
         {events.length === 0 && !error && (
-          <div className="flex flex-col items-center justify-center py-32 text-center glass-panel rounded-3xl glow-border border-dashed">
-             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                <ShieldCheck className="w-10 h-10 text-primary/40" />
+          <div className="flex flex-col items-center justify-center py-32 text-center bg-white border border-slate-200 border-dashed rounded-2xl">
+             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                <Search className="w-8 h-8 text-slate-200" />
              </div>
-             <h3 className="text-xl font-bold text-white mb-2">Immutable Search Active</h3>
-             <p className="text-slate-500 max-w-sm text-sm font-medium leading-relaxed">Enter a transaction reference hash from the network feed to retrieve its cryptographic payload.</p>
+             <h3 className="text-xl font-bold text-slate-900 mb-2">Immutable Protocol Audit</h3>
+             <p className="text-slate-500 max-w-sm text-sm font-medium leading-relaxed">Enter a transaction reference hash for a complete witness verification report and clearing finality proof.</p>
           </div>
         )}
       </div>

@@ -46,14 +46,14 @@ app.use('/v1/events', eventsRoutes);
 // Lightweight Ping for Cron-jobs
 app.get('/ping', (req, res) => res.send('pong'));
 
-// Root Route (Premium Welcome message)
+// Root Route (Institutional Welcome)
 app.get('/api/welcome', (req, res) => {
   res.send(`
-    <div style="font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-      <h1 style="font-size: 3rem; margin-bottom: 1rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CONNEX MVP</h1>
-      <p style="font-size: 1.25rem; color: #94a3b8; max-width: 600px;">The neutral cryptographic evidence layer for cross-border payment coordination.</p>
-      <div style="margin-top: 2rem; padding: 1rem 2rem; border: 1px solid #1e293b; border-radius: 0.5rem; background: #1e293b50;">
-        <code style="color: #38bdf8;">GET /health</code> <span style="color: #475569; margin: 0 10px;">|</span> <span style="color: #64748b;">API Version 1.0 (March 2026)</span>
+    <div style="font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+      <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; color: #0f172a;">CONNEX MVP</h1>
+      <p style="font-size: 1.25rem; color: #475569; max-width: 600px; font-weight: 500;">Forensic coordination and evidence layer for institutional settlement.</p>
+      <div style="margin-top: 2rem; padding: 1.5rem 3rem; border: 1px solid #e2e8f0; border-radius: 1rem; background: #ffffff; shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <code style="color: #2563eb; font-weight: 800;">GET /health</code> <span style="color: #cbd5e1; margin: 0 15px;">|</span> <span style="color: #64748b; font-weight: 600;">PRD STABLE 1.0.4</span>
       </div>
     </div>
   `);

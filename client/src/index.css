@@ -1,45 +1,47 @@
 @import "tailwindcss";
 
+@import "tailwindcss";
+
 @theme {
-  /* Deep Space Palette */
-  --color-background: #050505;
-  --color-surface: #0a0a0f;
-  --color-surface-elevated: #111118;
+  /* Institutional Palette (Professional/Bank-Ready) */
+  --color-background: #f8fafc; /* Slate-50 */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1f5f9; /* Slate-100 */
   
-  --color-primary: #38bdf8;
-  --color-secondary: #818cf8;
-  --color-accent: #fb7185;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-primary: #0f172a; /* Slate-900 */
+  --color-secondary: #475569; /* Slate-600 */
+  --color-accent: #2563eb; /* Blue-600 */
+  --color-success: #15803d; /* Green-700 */
+  --color-warning: #b45309; /* Amber-700 */
+  --color-danger: #b91c1c; /* Red-700 */
   
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Custom Glows */
-  --shadow-glow-blue: 0 0 20px -5px rgba(56, 189, 248, 0.3);
-  --shadow-glow-emerald: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+  /* standard Institutional Shadow */
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 @layer base {
   body {
-    @apply antialiased font-sans selection:bg-primary/20 text-slate-300 bg-background;
+    @apply antialiased font-sans selection:bg-accent/10 text-slate-900 bg-background;
   }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  .institution-card {
+    @apply bg-white border border-slate-200 shadow-card rounded-lg;
   }
   
-  .glass-header {
-    @apply bg-background/60 backdrop-blur-md border-b border-white/5 sticky top-0 z-50;
+  .institution-header {
+    @apply bg-white border-b border-slate-200 sticky top-0 z-50;
   }
 
-  .glow-border {
-    @apply border border-white/10 ring-1 ring-white/5 shadow-2xl;
+  .data-divider {
+    @apply border-b border-slate-100;
   }
   
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
