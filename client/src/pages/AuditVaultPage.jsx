@@ -15,7 +15,7 @@ export default function AuditVaultPage() {
   const fetchVault = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`${API_BASE}/vault`, {
+      const res = await axios.get(`${API_BASE}/vault?_t=${Date.now()}`, {
         headers: { 'x-api-key': 'connex_secret_mvp_2026' }
       });
       // Sort blocks by number descending for the feed
@@ -33,7 +33,7 @@ export default function AuditVaultPage() {
   const verifyIntegrity = async () => {
     setIsVerifying(true);
     try {
-      const res = await axios.get(`${API_BASE}/vault/verify`, {
+      const res = await axios.get(`${API_BASE}/vault/verify?_t=${Date.now()}`, {
         headers: { 'x-api-key': 'connex_secret_mvp_2026' }
       });
       setIntegrityReport(res.data);
@@ -47,80 +47,116 @@ export default function AuditVaultPage() {
 
   useEffect(() => {
     fetchVault();
-    const interval = setInterval(fetchVault, 5000);
+    const interval = setInterval(() => {
+      // Only fetch if the tab is visible — saves Supabase credits
+      if (document.visibilityState === 'visible') {
+        fetchVault();
+      }
+    }, 60000); // Every 60 seconds instead of every 5s
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="bg-[#0a0c10] min-h-screen p-4 md:p-8 text-white font-sans antialiased">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-background min-h-screen text-slate-300 pb-20 transition-colors duration-700 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[0%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-6 pt-12 relative z-10">
         
         {/* Vault Header Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-          <div>
-            <h1 className="text-2xl font-black tracking-tighter flex items-center gap-3">
-              <Database className="text-blue-500 w-6 h-6" />
-              CONNEX EVIDENCE VAULT
-            </h1>
-            <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mt-1">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-2.5 bg-primary/10 rounded-2xl border border-primary/20 shadow-glow-blue">
+                <Database className="text-primary w-6 h-6" />
+              </div>
+              <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">
+                Evidence Vault
+              </h1>
+            </div>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.3em]">
               Autonomous Post-Facto Preservation Layer
             </p>
-          </div>
+          </motion.div>
 
-          <div className="flex items-center gap-3">
-            <button 
+          <div className="flex flex-wrap items-center gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={verifyIntegrity}
               disabled={isVerifying}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all flex items-center gap-2 group"
+              className="px-6 py-3 glass-panel hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 group shadow-2xl"
             >
               {isVerifying ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <RefreshCw className="w-4 h-4 animate-spin text-primary" />
               ) : (
-                <ShieldCheck className={`w-3.5 h-3.5 ${integrityReport?.valid ? 'text-emerald-500' : 'text-slate-400 group-hover:text-blue-400'}`} />
+                <ShieldCheck className={`w-4 h-4 ${integrityReport?.valid ? 'text-success' : 'text-primary'}`} />
               )}
-              {integrityReport ? (integrityReport.valid ? 'INTEGRITY VERIFIED' : 'INTEGRITY FAILED') : 'RUN INTEGRITY CHECK'}
-            </button>
-            <div className="h-8 w-px bg-white/10"></div>
-            <div className="px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Live Sync Active</span>
+              {integrityReport ? (integrityReport.valid ? 'Integrity Verified' : 'Integrity Failed') : 'Audit Quorum Integrity'}
+            </motion.button>
+
+            <div className="h-10 w-px bg-white/5 mx-2"></div>
+
+            <div className="px-5 py-3 bg-success/5 border border-success/20 rounded-2xl shadow-glow-emerald">
+               <div className="flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></div>
+                 <span className="text-[10px] font-black text-success uppercase tracking-widest leading-none">Global Sync Active</span>
                </div>
             </div>
           </div>
         </div>
 
-        {/* Impact Message */}
-        <div className="bg-blue-600/5 border border-blue-500/20 rounded-2xl p-6 mb-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="p-3 bg-blue-600 rounded-xl">
-             <ShieldCheck className="text-white w-6 h-6" />
+        {/* Impact Message - Reimagined as a Glass Feature Component */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel overflow-hidden rounded-[2.5rem] p-10 mb-16 glow-border relative"
+        >
+          <div className="absolute top-0 right-0 p-10 opacity-10">
+            <Database size={120} className="text-primary" />
           </div>
-          <div className="flex-grow">
-            <h3 className="text-sm font-bold mb-1">ISO 20022 Data Preservation</h3>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
-              This vault captures and seals rich transaction metadata that is often lost or truncated in legacy inter-bank hops. 
-              By storing a signed hash of the full payload, we provide <strong>Instant Audit Finality</strong> for all participants.
-            </p>
+          
+          <div className="flex flex-col lg:flex-row items-center gap-10 relative z-10">
+            <div className="h-16 w-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center shadow-glow-blue flex-shrink-0">
+               <ShieldCheck className="text-background w-8 h-8" />
+            </div>
+            <div className="flex-grow text-center lg:text-left">
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter italic mb-3">ISO 20022 Data Preservation</h3>
+              <p className="text-sm text-slate-400 leading-relaxed max-w-3xl">
+                The Connex Evidence Layer captures and seals high-fidelity transaction metadata that is traditionally lost in legacy SWIFT/ISO hops. 
+                By storing a cryptographically signed hash of the full payload, we establish <strong>mathematical finality</strong> for every participant in the network.
+              </p>
+            </div>
+            <div className="text-center lg:text-right px-8 py-4 border-l border-white/5">
+              <p className="text-5xl font-black text-white tracking-tighter italic tabular-nums">{blocks.length}</p>
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mt-2">Traces Sealed</p>
+            </div>
           </div>
-          <div className="text-right hidden lg:block">
-            <p className="text-2xl font-black text-white">{blocks.length}</p>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Total Traces Sealed</p>
-          </div>
-        </div>
+        </motion.div>
 
         {/* Main Vault Content */}
         {error ? (
-          <div className="bg-rose-500/10 border border-rose-500/20 p-8 rounded-2xl text-center">
-            <AlertTriangle className="text-rose-500 w-8 h-8 mx-auto mb-4" />
-            <p className="text-sm font-bold text-rose-500">{error}</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-danger/10 border border-danger/20 p-12 rounded-3xl text-center glow-border"
+          >
+            <AlertTriangle className="text-danger w-12 h-12 mx-auto mb-6" />
+            <p className="text-sm font-black text-danger uppercase tracking-widest">{error}</p>
+          </motion.div>
         ) : isLoading && blocks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-600">
-            <RefreshCw className="w-8 h-8 animate-spin mb-4 opacity-20" />
-            <p className="text-xs font-bold tracking-widest uppercase">Initializing Vault Connection...</p>
+          <div className="flex flex-col items-center justify-center py-32 text-slate-600">
+            <RefreshCw className="w-12 h-12 animate-spin mb-6 opacity-20 text-primary" />
+            <p className="text-[10px] font-black tracking-[0.3em] uppercase">Decrypting Vault Shards...</p>
           </div>
         ) : (
-          <AuditVault blocks={blocks} />
+          <div className="relative">
+            <AuditVault blocks={blocks} />
+          </div>
         )}
 
       </div>

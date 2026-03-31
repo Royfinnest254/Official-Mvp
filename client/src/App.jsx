@@ -16,55 +16,60 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased font-sans">
-      {/* Enterprise Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('process')}>
-             <img src={logo} alt="Connex Cx Logo" className="h-9 w-auto" />
+    <div className="min-h-screen flex flex-col bg-background text-slate-300 antialiased font-sans">
+      {/* Enterprise Glass Header */}
+      <header className="glass-header">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center space-x-4 cursor-pointer group" onClick={() => setActiveTab('process')}>
+             <div className="relative">
+                <div className="absolute -inset-2 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/30 transition-all opacity-0 group-hover:opacity-100"></div>
+                <img src={logo} alt="Connex Cx Logo" className="h-10 w-auto relative z-10 filter brightness-110" />
+             </div>
              <div className="flex flex-col justify-center">
-                <span className="text-sm font-black text-slate-900 leading-tight tracking-tight uppercase italic">Connex</span>
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight">Evidence Layer v1.0</span>
+                <span className="text-lg font-black text-white leading-tight tracking-tighter uppercase italic">Connex</span>
+                <span className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] leading-tight">Evidence Layer v1.0</span>
              </div>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-1 text-sm font-semibold">
+          <nav className="hidden md:flex items-center space-x-2 text-xs font-bold uppercase tracking-widest">
              <button 
                 onClick={() => setActiveTab('process')}
-                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'process' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
+                className={`px-5 py-2 rounded-full transition-all duration-300 ${activeTab === 'process' ? 'bg-primary/10 text-primary border border-primary/20 shadow-glow-blue' : 'text-slate-500 hover:text-slate-300'}`}
              >
-               How it Works
+               Protocol
              </button>
              <button 
                 onClick={() => setActiveTab('health')}
-                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'health' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
+                className={`px-5 py-2 rounded-full transition-all duration-300 ${activeTab === 'health' ? 'bg-primary/10 text-primary border border-primary/20 shadow-glow-blue' : 'text-slate-500 hover:text-slate-300'}`}
              >
-               Live Network
+               Network
              </button>
              <button 
                 onClick={() => setActiveTab('disputes')}
-                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'disputes' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
+                className={`px-5 py-2 rounded-full transition-all duration-300 ${activeTab === 'disputes' ? 'bg-primary/10 text-primary border border-primary/20 shadow-glow-blue' : 'text-slate-500 hover:text-slate-300'}`}
              >
-               Dispute Resolution
+               Disputes
              </button>
              <button 
                 onClick={() => setActiveTab('reports')}
-                className={`px-4 transition-all py-5 border-b-2 text-[11px] uppercase tracking-wider ${activeTab === 'reports' ? 'text-blue-700 border-blue-700' : 'text-slate-400 hover:text-slate-600 border-transparent'}`}
+                className={`px-5 py-2 rounded-full transition-all duration-300 ${activeTab === 'reports' ? 'bg-primary/10 text-primary border border-primary/20 shadow-glow-blue' : 'text-slate-500 hover:text-slate-300'}`}
              >
-               Evidence Vault
+               Vault
              </button>
           </nav>
 
-          <div className="flex items-center space-x-4">
-             <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs font-bold text-slate-800">Operational Admin</span>
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">System Secure</span>
+          <div className="flex items-center space-x-6">
+             <div className="hidden lg:flex flex-col items-end">
+                <span className="text-[10px] font-black text-white uppercase tracking-widest">Admin Terminal</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></div>
+                  <span className="text-[9px] text-success/80 font-bold uppercase tracking-tight">Secured Connection</span>
                 </div>
              </div>
-             <div className="h-9 w-9 rounded-xl bg-blue-600 shadow-lg shadow-blue-100 flex items-center justify-center text-white font-black text-xs">
-               RC
+             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-secondary p-[1px]">
+                <div className="h-full w-full rounded-xl bg-background flex items-center justify-center text-white font-black text-xs">
+                  RC
+                </div>
              </div>
           </div>
         </div>
@@ -73,8 +78,13 @@ function App() {
       {/* Main Content Area */}
       <main className="flex-grow">
         {activeTab === 'process' && (
-          <div className="p-12 text-center text-slate-500 font-medium">
-            How It Works documentation is currently being updated. Please view the Live Network.
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="max-w-md text-center p-8 glass-panel rounded-3xl glow-border">
+              <h2 className="text-xl font-bold text-white mb-2">Protocol Briefing</h2>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                The Connex Protocol documentation is being synchronized with the latest v1.0 specifications.
+              </p>
+            </div>
           </div>
         )}
         {activeTab === 'disputes' && <DisputePortal initialTxId={initialTxId} />}
@@ -83,17 +93,17 @@ function App() {
       </main>
 
       {/* Enterprise Footer */}
-      <footer className="border-t border-slate-200 py-5 bg-white">
-         <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between text-slate-400 text-[11px] font-medium gap-4">
-            <div className="flex items-center space-x-2">
-               <span>&copy; 2026 CONNEX Technologies.</span>
-               <span className="text-slate-300">|</span>
-               <span>Founded by <strong className="text-slate-600">Roy Chumba</strong></span>
+      <footer className="border-t border-white/5 py-8 bg-surface">
+         <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] gap-8">
+            <div className="flex items-center space-x-4">
+               <span className="text-slate-400">&copy; 2026 CONNEX TECHNOLOGIES</span>
+               <div className="h-3 w-px bg-white/10"></div>
+               <span>FOUNDED BY <strong className="text-white">ROY CHUMBA</strong></span>
             </div>
-            <div className="flex items-center space-x-6">
-                <span>ISO 20022 Compliant</span>
-                <span>PCI-DSS Tier 1 Verified</span>
-                <span className="text-slate-300">v1.0.0</span>
+            <div className="flex items-center space-x-8">
+                <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-primary"></div> ISO 20022</span>
+                <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-primary"></div> PCI-DSS TIER 1</span>
+                <span className="text-primary/50">BUILD 1.0.0-PROD</span>
             </div>
          </div>
       </footer>
