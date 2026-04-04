@@ -9,7 +9,6 @@ const observationRoutes = require('./routes/observations');
 const vaultRoutes = require('./routes/vault');
 const healthRoutes = require('./routes/health');
 const transactionRoutes = require('./routes/transactions');
-const eventsRoutes = require('./routes/events'); // [NEW] PRD Gateway Route
 
 const app = express();
 const PORT = process.env.PORT || 3000;
