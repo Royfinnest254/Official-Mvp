@@ -58,15 +58,23 @@ func init() {
 }
 
 func main() {
-	// Initialize Supabase
+	// Initialize Supabase with safety checks
 	sbURL := os.Getenv("SUPABASE_URL")
 	sbKey := os.Getenv("SUPABASE_SERVICE_KEY")
-	client, err := supabase.NewClient(sbURL, sbKey, nil)
-	if err == nil {
-		supabaseClient = client
+	
+	if sbURL == "" || sbKey == "" {
+		log.Println("⚠️  WARNING: SUPABASE_URL or SUPABASE_SERVICE_KEY is missing. Audit ledger will be disabled.")
+	} else {
+		client, err := supabase.NewClient(sbURL, sbKey, nil)
+		if err != nil {
+			log.Printf("❌ ERROR: Failed to initialize Supabase client: %v", err)
+		} else {
+			supabaseClient = client
+			log.Println("✅ Supabase Audit Ledger initialized.")
+		}
 	}
 
-	// Prime Cache (Hardcoded for first start)
+	// Prime Cache
 	prevHash = "0000000000000000000000000000000000000000000000000000000000000000"
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -75,15 +83,26 @@ func main() {
 			"status":    "active",
 			"engine":    "Go Ultra-Latency",
 			"prev_hash": prevHash[:8],
+			"uptime":    time.Since(time.Now()).String(), // Placeholder for restart tracking
 		})
 	})
 
 	http.HandleFunc("/v1/events", handleEvent)
 
+	// INNOVATION: Absolute Port Binding
+	// We prioritize the environment variable provided by Render.
 	port := os.Getenv("PORT")
-	if port == "" { port = "3000" }
-	log.Printf("Connex Production Gateway live on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	if port == "" { 
+		port = "3000" 
+	}
+	
+	log.Printf("🚀 Connex Production Gateway starting on port %s...", port)
+	
+	// Use 0.0.0.0 to ensure outside connectivity on Render
+	err := http.ListenAndServe("0.0.0.0:"+port, nil)
+	if err != nil {
+		log.Fatalf("❌ CRITICAL: Failed to start server: %v", err)
+	}
 }
 
 func handleEvent(w http.ResponseWriter, r *http.Request) {
