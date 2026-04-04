@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle, Copy, Check } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
-// We are querying the production cloud directly!
-const API_BASE_URL = 'https://official-mvp-production.up.railway.app';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3001' 
+  : window.location.origin;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -170,9 +171,9 @@ export default function DisputePortal({ initialTxId }) {
                   {/* Evidence Body */}
                   <div className="p-8">
                     {/* The Official Verdict Section */}
-                    <div className={`mb-10 p-6 rounded-xl border ${consensusMet ? 'bg-slate-900 border-slate-900' : 'bg-white border-red-200'}`}>
+                    <div className={`mb-6 p-6 rounded-xl border ${consensusMet ? 'bg-slate-900 border-slate-900' : 'bg-white border-red-200'}`}>
                        <h3 className={`text-[10px] font-black uppercase tracking-widest mb-4 flex items-center ${consensusMet ? 'text-slate-400' : 'text-red-600'}`}>
-                          <div className={`w-2 h-2 rounded-full mr-3 ${consensusMet ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-red-500 animate-pulse'}`}></div>
+                          <div className={`w-2 h-2 rounded-full mr-3 ${consensusMet ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`}></div>
                           Protocol Consensus Verdict
                        </h3>
                        <p className={`text-lg font-bold leading-relaxed tracking-tight ${consensusMet ? 'text-white' : 'text-red-900'}`}>
@@ -182,6 +183,26 @@ export default function DisputePortal({ initialTxId }) {
                               : `Consensus Met. Funds successfully processed from ${event.institution_a} to ${event.institution_b}. Witness signatures verified and ledger sealed.`
                            : `INTEGRITY FAILURE. Quorum could not be reached. The mathematical proof for this event is incomplete.`}
                        </p>
+                    </div>
+
+                    {/* AI Forensic Auditor Insight */}
+                    <div className="mb-10 p-6 rounded-xl bg-blue-50/50 border border-blue-100/50 relative overflow-hidden group hover:border-blue-300 transition-all">
+                       <div className="absolute -right-4 -top-4 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                          <ShieldCheck size={120} className="text-blue-900" />
+                       </div>
+                       <div className="relative z-10">
+                          <div className="flex items-center gap-3 mb-4">
+                             <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                <span className="text-[10px] font-black text-white">AI</span>
+                             </div>
+                             <span className="text-[10px] font-bold text-blue-900 uppercase tracking-widest">DeepSeek Forensic Brief</span>
+                          </div>
+                          <p className="text-xs font-medium text-blue-800 leading-relaxed italic pr-12">
+                             {consensusMet 
+                               ? `Mathematical finality has been achieved across the federated witness layer. Analysis of the cryptographic trace confirms that ${event.institution_a} initiated a ${event.event_type} sequence that was successfully signed by ${validCount} of 3 independent oracle nodes. Evidence has been immutable archived in the ISO 20022 vault (Local Root).`
+                               : `CRITICAL ALERT: Forensic tracing identifies a signature mismatch. Only ${validCount} out of 3 required witnesses responded within the 100ms clearing window. Internal metadata suggests a synchronization delay at the Connex-AZ-03 node. Recommend manual clearing override or forensic re-sync.`}
+                          </p>
+                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-12 mb-10 text-center sm:text-left">

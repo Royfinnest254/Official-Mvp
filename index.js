@@ -41,7 +41,7 @@ app.use('/vault', authenticate, vaultRoutes);
 app.use('/tx', authenticate, transactionRoutes);
 
 // [NEW] PRD v0.1 Endpoints
-app.use('/v1/events', eventsRoutes);
+app.use('/v1/events', authenticate, eventsRoutes);
 
 // Lightweight Ping for Cron-jobs
 app.get('/ping', (req, res) => res.send('pong'));
@@ -85,7 +85,7 @@ app.get('/test-nodes', async (req, res) => {
 });
 
 // Catch-all route for React Router (must be the last route before app.listen)
-app.get('(.*)', (req, res) => {
+app.get('/*path', (req, res) => {
   // If React isn't built, fallback to API welcome
   if (!require('fs').existsSync(path.join(__dirname, 'client/dist/index.html'))) {
     return res.send(`

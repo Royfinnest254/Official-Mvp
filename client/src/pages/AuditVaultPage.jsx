@@ -3,7 +3,9 @@ import axios from 'axios';
 import AuditVault from '../components/AuditVault';
 import { Database, ShieldCheck, RefreshCw, AlertTriangle } from 'lucide-react';
 
-const API_BASE = 'https://official-mvp-production.up.railway.app';
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3001' 
+  : window.location.origin;
 
 export default function AuditVaultPage() {
   const [blocks, setBlocks] = useState([]);

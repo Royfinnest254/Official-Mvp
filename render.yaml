@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: official-mvp
+    env: node
+    plan: free # Change to 'starter' for 24/7 reliability
+    region: oregon 
+    buildCommand: npm install && npm install --prefix client && npm run build --prefix client
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: API_KEY
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: NODE_1_URL
+        sync: false
+      - key: NODE_2_URL
+        sync: false
+      - key: NODE_3_URL
+        sync: false
+      # Frontend is served statically by index.js and uses relative paths.

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ArrowRight, ShieldAlert, CheckCircle2, Zap, AlertTriangle, Clock } from 'lucide-react';
+import { Activity, ArrowRight, ShieldAlert, CheckCircle2, Zap, AlertTriangle, Clock, Cpu, ShieldCheck } from 'lucide-react';
 
 const API_KEY = 'connex_secret_mvp_2026';
-const API_BASE_URL = 'https://official-mvp-production.up.railway.app';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3001' 
+  : window.location.origin;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

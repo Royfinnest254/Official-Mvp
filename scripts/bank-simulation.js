@@ -28,8 +28,8 @@ function generateEvent() {
   const isDispute = (txCounter % 25 === 0);
   
   return {
-    institution_a: isBankA ? 'BANK_A_KE' : 'BANK_B_KE',
-    institution_b: isBankA ? 'BANK_B_KE' : 'BANK_A_KE',
+    institution_a: isBankA ? 'TIER_1_SETTLEMENT' : 'MOBILE_GATEWAY_NODE',
+    institution_b: isBankA ? 'MOBILE_GATEWAY_NODE' : 'TIER_1_SETTLEMENT',
     event_type: isDispute ? 'REJECT' : 'CONFIRM',
     tx_ref_hash: 'OQX' + Math.floor(Math.random() * 1000000).toString(),
     timestamp: Date.now(),
@@ -77,7 +77,7 @@ function runSimulation() {
 
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.SIM_PORT || 3005;
 
 app.get('/ping', (req, res) => res.send('pong'));
 
