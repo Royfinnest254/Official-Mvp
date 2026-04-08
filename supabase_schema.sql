@@ -10,12 +10,13 @@ CREATE TABLE public.coordination_records (
   institution_a VARCHAR(64)  NOT NULL,
   institution_b VARCHAR(64)  NOT NULL,
   event_type    VARCHAR(16)  NOT NULL CHECK (event_type IN ('INITIATE', 'CONFIRM', 'REJECT', 'REVERSE')),
-  tx_ref_hash   CHAR(64)     NOT NULL,
+  tx_ref_hash   VARCHAR(64)  NOT NULL,
   chain_hash    CHAR(64)     NOT NULL,
   prev_hash     CHAR(64)     NOT NULL,
   sig_node_1    TEXT         NOT NULL,
   sig_node_2    TEXT         NOT NULL,
   sig_node_3    TEXT         NOT NULL,
+  latency_ms    INTEGER,
   event_ts      BIGINT       NOT NULL,
   created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
 );

@@ -1,0 +1,140 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFINITY",
+      "label": "Infinity",
+      "description": "Select your Infinity data source",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource"
+    }
+  ],
+  "annotations": { "list": [] },
+  "description": "Infinity REST API Dashboard bypassing Postgres connections.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "CORE NETWORK HEALTH & STATS",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#38bdf8", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "url": "/rpc/get_dashboard_stats",
+          "url_options": { "method": "GET", "data": "" },
+          "format": "table",
+          "root_selector": "",
+          "columns": [ { "selector": "total_transactions", "text": "value", "type": "number" } ],
+          "refId": "A"
+        }
+      ],
+      "title": "TOTAL TRANSACTIONS",
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#10b981", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "url": "/rpc/get_dashboard_stats",
+          "url_options": { "method": "GET", "data": "" },
+          "format": "table",
+          "root_selector": "",
+          "columns": [ { "selector": "active_institutions", "text": "value", "type": "number" } ],
+          "refId": "A"
+        }
+      ],
+      "title": "ACTIVE INSTITUTIONS",
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#f59e0b", "value": null } ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "url": "/rpc/get_dashboard_stats",
+          "format": "table",
+          "root_selector": "",
+          "columns": [ { "selector": "avg_latency", "text": "value", "type": "number" } ],
+          "refId": "A"
+        }
+      ],
+      "title": "AVERAGE LATENCY",
+      "type": "stat"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["failsafe", "infinity"],
+  "time": { "from": "now-7d", "to": "now" },
+  "timezone": "utc",
+  "title": "CONNEX MISSION CONTROL | INFINITY UNLOCKED",
+  "uid": "connex-infinity-v6",
+  "version": 1
+}

@@ -1,44 +1,57 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 @theme {
-  /* Institutional Palette (Professional/Bank-Ready) */
-  --color-background: #f8fafc; /* Slate-50 */
+  /* AWS Core Palette (Production Management) */
+  --color-background: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-elevated: #f1f5f9; /* Slate-100 */
+  --color-surface-elevated: #f2f3f3; /* AWS Light Grey */
   
-  --color-primary: #0f172a; /* Slate-900 */
-  --color-secondary: #475569; /* Slate-600 */
-  --color-accent: #2563eb; /* Blue-600 */
-  --color-success: #15803d; /* Green-700 */
-  --color-warning: #b45309; /* Amber-700 */
-  --color-danger: #b91c1c; /* Red-700 */
+  --color-primary: #232f3e; /* AWS Navy */
+  --color-secondary: #545b64; /* AWS Dark Grey */
+  --color-accent: #0073bb; /* AWS Blue */
+  --color-highlight: #ff9900; /* AWS Orange */
   
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --color-success: #037f0c;
+  --color-warning: #ec7211;
+  --color-danger: #d13212;
+  
+  --font-sans: "Inter", "Helvetica Neue", Roboto, Arial, sans-serif;
+  --font-mono: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro", monospace;
 
-  /* standard Institutional Shadow */
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  /* AWS Console Standard Shadows */
+  --shadow-card: 0 1px 1px 0 rgba(0, 28, 36, 0.3), 1px 1px 1px 0 rgba(0, 28, 36, 0.15);
+  --shadow-portal: 0 4px 8px 0 rgba(0, 28, 36, 0.1);
 }
 
 @layer base {
   body {
-    @apply antialiased font-sans selection:bg-accent/10 text-slate-900 bg-background;
+    @apply antialiased font-sans text-[#16191f] bg-background;
   }
 }
 
 @layer utilities {
-  .institution-card {
-    @apply bg-white border border-slate-200 shadow-card rounded-lg;
+  .aws-portal-card {
+    @apply bg-white border border-[#eaeded] shadow-card rounded-[4px];
   }
   
-  .institution-header {
-    @apply bg-white border-b border-slate-200 sticky top-0 z-50;
+  .aws-header {
+    @apply bg-primary text-white sticky top-0 z-50 h-[50px] flex items-center px-6;
+  }
+
+  .aws-sidebar {
+    @apply bg-white border-r border-[#eaeded] fixed left-0 top-[50px] bottom-0 w-[240px] z-40;
+  }
+
+  .aws-content-area {
+    @apply pl-[240px] pt-[50px] min-h-screen bg-[#f2f3f3];
+  }
+
+  .aws-button-primary {
+    @apply bg-highlight hover:bg-[#eb8f00] text-primary font-bold px-4 py-2 rounded-[2px] transition-all text-xs;
   }
 
   .data-divider {
-    @apply border-b border-slate-100;
+    @apply border-b border-[#eaeded];
   }
   
   .no-scrollbar::-webkit-scrollbar { display: none; }

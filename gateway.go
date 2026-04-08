@@ -27,12 +27,12 @@ type EventRequest struct {
 }
 
 type ProofBundle struct {
-	BundleID     string   `json:"bundle_id"`
-	ChainHash    string   `json:"chain_hash"`
-	PrevHash     string   `json:"prev_hash"`
-	Signatures   []string `json:"signatures"`
-	Status       string   `json:"status"`
-	Timestamp    int64    `json:"issued_at"`
+	BundleID   string   `json:"bundle_id"`
+	ChainHash  string   `json:"chain_hash"`
+	PrevHash   string   `json:"prev_hash"`
+	Signatures []string `json:"signatures"`
+	Status     string   `json:"status"`
+	Timestamp  int64    `json:"issued_at"`
 }
 
 var (
@@ -44,7 +44,7 @@ var (
 
 func init() {
 	_ = godotenv.Load()
-	
+
 	// INNOVATION: Persistent Transport Pooling for Absolute Performance
 	tr := &http.Transport{
 		MaxIdleConns:        100,
@@ -61,7 +61,7 @@ func main() {
 	// Initialize Supabase with safety checks
 	sbURL := os.Getenv("SUPABASE_URL")
 	sbKey := os.Getenv("SUPABASE_SERVICE_KEY")
-	
+
 	if sbURL == "" || sbKey == "" {
 		log.Println("⚠️  WARNING: SUPABASE_URL or SUPABASE_SERVICE_KEY is missing. Audit ledger will be disabled.")
 	} else {
@@ -92,12 +92,12 @@ func main() {
 	// INNOVATION: Absolute Port Binding
 	// We prioritize the environment variable provided by Render.
 	port := os.Getenv("PORT")
-	if port == "" { 
-		port = "3000" 
+	if port == "" {
+		port = "3000"
 	}
-	
+
 	log.Printf("🚀 Connex Production Gateway starting on port %s...", port)
-	
+
 	// Use 0.0.0.0 to ensure outside connectivity on Render
 	err := http.ListenAndServe("0.0.0.0:"+port, nil)
 	if err != nil {
@@ -107,7 +107,7 @@ func main() {
 
 func handleEvent(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	
+
 	var req EventRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid payload", 400)
@@ -140,7 +140,9 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 	var wg sync.WaitGroup
 
 	for _, url := range nodeURLs {
-		if url == "" { continue }
+		if url == "" {
+			continue
+		}
 		wg.Add(1)
 		go func(nodeURL string) {
 			defer wg.Done()
@@ -202,11 +204,11 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Coordination-Time", totalTime.String())
 	json.NewEncoder(w).Encode(ProofBundle{
-		BundleID:  "cx-" + uuid.New().String()[:8],
-		ChainHash: chainHash,
-		PrevHash:  currentPrevHash,
+		BundleID:   "cx-" + uuid.New().String()[:8],
+		ChainHash:  chainHash,
+		PrevHash:   currentPrevHash,
 		Signatures: signatures,
-		Status:    "QUORUM_REACHED",
-		Timestamp: time.Now().UnixMilli(),
+		Status:     "QUORUM_REACHED",
+		Timestamp:  time.Now().UnixMilli(),
 	})
 }

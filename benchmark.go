@@ -44,10 +44,10 @@ func main() {
 
 	// 2. Start the Gateway
 	gatewayCmd := exec.Command(".\\gateway.exe")
-	gatewayCmd.Env = append(os.Environ(), 
-		"PORT=3000", 
-		"NODE_1_URL=http://localhost:8001", 
-		"NODE_2_URL=http://localhost:8002", 
+	gatewayCmd.Env = append(os.Environ(),
+		"PORT=3000",
+		"NODE_1_URL=http://localhost:8001",
+		"NODE_2_URL=http://localhost:8002",
 		"NODE_3_URL=http://localhost:8003",
 		"SUPABASE_URL=http://localhost:54321",
 		"SUPABASE_SERVICE_KEY=mock",
@@ -85,7 +85,7 @@ func main() {
 			"institution_b": "KCB",
 			"event_type":    "INITIATE",
 			"tx_ref_hash":   "hash_test_123",
-			"timestamp":    fmt.Sprintf("%d", time.Now().UnixMilli()),
+			"timestamp":     fmt.Sprintf("%d", time.Now().UnixMilli()),
 		}
 		body, _ := json.Marshal(payload)
 
@@ -116,7 +116,7 @@ func main() {
 		fmt.Println("\n--- BENCHMARK RESULTS ---")
 		fmt.Printf("Average Coordination Latency: %v\n", avg)
 		fmt.Printf("Success Rate: %d/%d\n", successCount, iterations)
-		
+
 		if avg < 100*time.Millisecond {
 			fmt.Println("✅ TARGET MET: Sub-100ms confirmed.")
 		} else {

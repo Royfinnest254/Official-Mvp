@@ -1,0 +1,215 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_POSTGRESQL",
+      "label": "PostgreSQL",
+      "description": "Select your Supabase PostgreSQL data source",
+      "type": "datasource",
+      "pluginId": "postgres"
+    }
+  ],
+  "annotations": { "list": [{ "builtIn": 1, "datasource": "-- Grafana --", "enable": true, "hide": true, "name": "Annotations & Alerts", "type": "dashboard" }] },
+  "description": "PostgreSQL-only high-density dashboard for immediate data visibility.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "CORE NETWORK HEALTH & SYSTEM STABILITY",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "fillOpacity": 80 },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#38bdf8", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT count(*) as \"Total Records\" FROM public.coordination_records", "refId": "A" }],
+      "title": "TOTAL LEDGER TRANSACTIONS",
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#10b981", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT count(distinct institution_a) as \"Active Nodes\" FROM public.coordination_records", "refId": "A" }],
+      "title": "ACTIVE INSTITUTIONAL NODES",
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#f59e0b", "value": null } ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT COALESCE(avg(latency_ms), 0) as \"Avg Latency\" FROM public.coordination_records WHERE latency_ms IS NOT NULL", "refId": "A" }],
+      "title": "AVERAGE SETTLEMENT LATENCY",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "panels": [],
+      "title": "INSTITUTIONAL PERFORMANCE & SETTLEMENT LATENCY",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#38bdf8" },
+          "custom": {
+             "drawStyle": "line",
+             "fillOpacity": 15,
+             "lineWidth": 2,
+             "showPoints": "auto"
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 6 },
+      "id": 4,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [{ "format": "time_series", "rawSql": "SELECT $__timeGroupAlias(created_at, 1d), count(*) as \"Transactions\" FROM public.coordination_records WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1", "refId": "A" }],
+      "title": "HISTORICAL THROUGHPUT OVER TIME",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": {
+             "drawStyle": "line",
+             "fillOpacity": 15,
+             "lineWidth": 2
+          },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [
+               { "color": "#10b981", "value": null }
+             ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "id": 5,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [{ "format": "time_series", "rawSql": "SELECT $__timeGroupAlias(created_at, 1d), avg(latency_ms) as \"Avg Latency\" FROM public.coordination_records WHERE $__timeFilter(created_at) AND latency_ms IS NOT NULL GROUP BY 1 ORDER BY 1", "refId": "A" }],
+      "title": "SETTLEMENT LATENCY DRIFT",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 102,
+      "panels": [],
+      "title": "LEDGER ACTIVITY & AUDIT DISTRIBUTION",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+             "align": "auto",
+             "cellOptions": { "type": "auto" }
+          }
+        }
+      },
+      "gridPos": { "h": 6, "w": 10, "x": 0, "y": 15 },
+      "id": 6,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT institution_a || ' -> ' || institution_b as \"Routing Pair\", count(*) as \"Total Volume\" FROM public.coordination_records GROUP BY 1 ORDER BY 2 DESC LIMIT 10", "refId": "A" }],
+      "title": "TOP INSTITUTIONAL ROUTING PAIRS",
+      "type": "table"
+    },
+    {
+      "datasource": "${DS_POSTGRESQL}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "gridPos": { "h": 6, "w": 14, "x": 10, "y": 15 },
+      "id": 8,
+      "options": {
+        "displayLabels": ["percent", "name"],
+        "legend": { "displayMode": "list", "placement": "right" },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT event_type as \"Type\", count(*) as \"Volume\" FROM public.coordination_records GROUP BY 1", "refId": "A" }],
+      "title": "LEDger EVENT DISTRIBUTION (POSTGRESQL)",
+      "type": "piechart"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["institutional", "fintech", "postgres-only"],
+  "time": { "from": "now-7d", "to": "now" },
+  "timezone": "utc",
+  "title": "CONNEX INSTITUTIONAL LEDGER | POSTGRES-ONLY",
+  "uid": "connex-postgres-only-v3",
+  "version": 1
+}

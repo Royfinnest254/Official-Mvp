@@ -1,0 +1,158 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_POSTGRESQL",
+      "label": "PostgreSQL",
+      "description": "Select your Supabase PostgreSQL data source",
+      "type": "datasource",
+      "pluginId": "postgres"
+    }
+  ],
+  "annotations": { "list": [] },
+  "description": "FAILSAFE: Guaranteed data visualization for presentation.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "CORE NETWORK HEALTH",
+      "type": "row"
+    },
+    {
+      "datasource": "grafana-postgresql-datasource",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#38bdf8", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT count(*)::float as value FROM public.coordination_records", "refId": "A" }],
+      "title": "TOTAL TRANSACTIONS",
+      "type": "stat"
+    },
+    {
+      "datasource": "grafana-postgresql-datasource",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#10b981", "value": null } ]
+          }
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT count(distinct institution_a)::float as value FROM public.coordination_records", "refId": "A" }],
+      "title": "ACTIVE INSTITUTIONS",
+      "type": "stat"
+    },
+    {
+      "datasource": "grafana-postgresql-datasource",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+             "mode": "absolute",
+             "steps": [ { "color": "#f59e0b", "value": null } ]
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT COALESCE(avg(latency_ms), 0)::float as value FROM public.coordination_records", "refId": "A" }],
+      "title": "AVERAGE LATENCY",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 101,
+      "panels": [],
+      "title": "HISTORICAL PERFORMANCE",
+      "type": "row"
+    },
+    {
+      "datasource": "grafana-postgresql-datasource",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#38bdf8" },
+          "custom": {
+             "drawStyle": "line",
+             "fillOpacity": 15,
+             "lineWidth": 2,
+             "showPoints": "auto"
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 7 },
+      "id": 4,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [{ "format": "time_series", "rawSql": "SELECT $__timeGroupAlias(created_at, 1d), count(*)::float as value FROM public.coordination_records WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1", "refId": "A" }],
+      "title": "THROUGHPUT VOLUME",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "grafana-postgresql-datasource",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 7 },
+      "id": 8,
+      "options": {
+        "displayLabels": ["percent", "name"],
+        "legend": { "displayMode": "list", "placement": "right" },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [{ "format": "table", "rawSql": "SELECT event_type as metric, count(*)::float as value FROM public.coordination_records GROUP BY 1", "refId": "A" }],
+      "title": "EVENT DISTRIBUTION",
+      "type": "piechart"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["failsafe", "postgres"],
+  "time": { "from": "now-7d", "to": "now" },
+  "timezone": "utc",
+  "title": "CONNEX MISSION CONTROL | LIVE LEDGER",
+  "uid": "connex-failsafe-v4",
+  "version": 1
+}

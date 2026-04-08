@@ -7,13 +7,13 @@ require('dotenv').config();
 const axios = require('axios');
 const crypto = require('crypto');
 
-const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:3001/v1/events';
+const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:3000/v1/events';
 const API_KEY = process.env.API_KEY;
 
 // NOTE: Adjusted from 800 down to 5. 
 // Free-tier cloud services (like Render) immediately rate-limit or crash 
 // if you send 800 requests per second to them.
-const TARGET_TPS = 5;
+const TARGET_TPS = 8;
 
 let txCounter = 0;
 

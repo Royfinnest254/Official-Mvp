@@ -3,7 +3,7 @@ const router = express.Router();
 const { getChain, supabase } = require('../lib/db');
 const { hashBlock } = require('../lib/hash');
 
-// GET /chain - Return full hash chain
+// GET /vault - Return full hash chain
 router.get('/', async (req, res) => {
   try {
     const blocks = await getChain();
@@ -17,61 +17,74 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /chain/verify - Run integrity check
+// GET /vault/verify - Run detailed forensic integrity check
 router.get('/verify', async (req, res) => {
   try {
-    // Get all blocks ordered oldest first for sequential verification
-    const { data: blocks, error } = await supabase
-      .from('blocks')
+    const { data: records, error } = await supabase
+      .from('coordination_records')
       .select('*')
-      .order('block_number', { ascending: true });
+      .order('id', { ascending: true });
 
     if (error) throw error;
 
-    let valid = true;
+    const failures = [];
+    let lastHash = '0'.repeat(64);
     let blocksChecked = 0;
-    let lastHash = '0000000000000000000000000000000000000000000000000000000000000000';
 
-    for (const block of blocks) {
-      // 1. Check prev_hash links correctly
-      if (block.prev_hash !== lastHash) {
-        valid = false;
-        break;
+    for (const record of records) {
+      const issues = [];
+      
+      // 1. Linkage Check
+      if (record.prev_hash !== lastHash) {
+        issues.push({
+          type: 'LINKAGE_BROKEN',
+          message: `Previous hash mismatch. Expected ${lastHash.substring(0, 8)}... but found ${record.prev_hash.substring(0, 8)}...`,
+          expected: lastHash,
+          actual: record.prev_hash
+        });
       }
 
-      // 2. Re-calculate block_hash and compare
-      const calculatedHash = hashBlock(block.payload, block.prev_hash);
-      if (block.block_hash !== calculatedHash) {
-        valid = false;
-        break;
+      // 2. Hash Integrity Check
+      const calculatedHash = hashBlock(
+        record.tx_ref_hash,
+        record.institution_a,
+        record.institution_b,
+        record.prev_hash,
+        record.event_ts
+      );
+
+      if (record.chain_hash !== calculatedHash) {
+        issues.push({
+          type: 'HASH_MISMATCH',
+          message: 'Data corruption detected. Digital fingerprint does not match record contents.',
+          expected: calculatedHash,
+          actual: record.chain_hash
+        });
       }
 
-      lastHash = block.block_hash;
+      if (issues.length > 0) {
+        failures.push({
+          id: record.id,
+          bundle_id: record.bundle_id,
+          tx_id: record.tx_ref_hash,
+          issues
+        });
+      }
+
+      lastHash = record.chain_hash;
       blocksChecked++;
     }
 
-    res.json({ valid, blocksChecked });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    const valid = failures.length === 0;
+    const integrityScore = Math.max(0, 100 - (failures.length / blocksChecked * 100));
 
-// GET /chain/:blockId - Return a single block by its ID
-router.get('/:blockId', async (req, res) => {
-  const { blockId } = req.params;
-  try {
-    const { data: block, error } = await supabase
-      .from('blocks')
-      .select('*')
-      .eq('id', blockId)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return res.status(404).json({ error: 'Block not found' });
-      throw error;
-    }
-
-    res.json({ block });
+    res.json({ 
+      valid, 
+      blocksChecked, 
+      failures, 
+      integrityScore: parseFloat(integrityScore.toFixed(2)),
+      timestamp: Date.now()
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

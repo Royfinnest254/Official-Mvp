@@ -9,6 +9,7 @@ const observationRoutes = require('./routes/observations');
 const vaultRoutes = require('./routes/vault');
 const healthRoutes = require('./routes/health');
 const transactionRoutes = require('./routes/transactions');
+const eventsRoutes = require('./routes/events');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,9 +19,30 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP for PoC to prevent frontend blocks
   crossOriginResourcePolicy: false // Disable CORP to allow Vercel frontend to fetch
 }));
-app.use(cors());
+app.use(cors({
+  origin: '*', // Prototype-friendly (use specific domain in production)
+  allowedHeaders: ['Content-Type', 'x-api-key']
+}));
 app.use(morgan('dev'));
 app.use(express.json());
+
+// --- Metrics Middleware ---
+app.use((req, res, next) => {
+  const { httpRequestDuration } = require('./lib/metrics');
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    httpRequestDuration.observe(
+      { 
+        method: req.method, 
+        route: req.route ? req.route.path : req.path, 
+        status_code: res.statusCode 
+      }, 
+      duration
+    );
+  });
+  next();
+});
 
 // API Key Authentication Middleware
 const authenticate = (req, res, next) => {
@@ -45,25 +67,45 @@ app.use('/v1/events', authenticate, eventsRoutes);
 // Lightweight Ping for Cron-jobs
 app.get('/ping', (req, res) => res.send('pong'));
 
+// Prometheus Metrics Endpoint
+app.get('/metrics', async (req, res) => {
+  const { register } = require('./lib/metrics');
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
 // Root Route (Institutional Welcome)
-app.get('/api/welcome', (req, res) => {
+app.get('/', (req, res) => {
   res.send(`
-    <div style="font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-      <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; color: #0f172a;">CONNEX MVP</h1>
-      <p style="font-size: 1.25rem; color: #475569; max-width: 600px; font-weight: 500;">Forensic coordination and evidence layer for institutional settlement.</p>
-      <div style="margin-top: 2rem; padding: 1.5rem 3rem; border: 1px solid #e2e8f0; border-radius: 1rem; background: #ffffff; shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
-        <code style="color: #2563eb; font-weight: 800;">GET /health</code> <span style="color: #cbd5e1; margin: 0 15px;">|</span> <span style="color: #64748b; font-weight: 600;">PRD STABLE 1.0.4</span>
+    <style>
+      body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+      .card { background: #1e293b; border: 1px solid #334155; padding: 3rem; border-radius: 1.5rem; text-align: center; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+      h1 { font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -0.025em; font-weight: 800; }
+      p { color: #94a3b8; line-height: 1.6; margin-bottom: 2rem; }
+      .status { display: inline-flex; align-items: center; background: #064e3b; color: #34d399; padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
+      .dot { height: 8px; width: 8px; background: #34d399; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite; }
+      .links { border-top: 1px solid #334155; margin-top: 2rem; padding-top: 2rem; display: flex; gap: 1rem; justify-content: center; }
+      a { color: #38bdf8; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: color 0.2s; }
+      a:hover { color: #7dd3fc; }
+      @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+    <div class="card">
+      <div class="status"><span class="dot"></span> GATEWAY ACTIVE</div>
+      <h1>CONNEX CORE</h1>
+      <p>Forensic coordination and evidence layer for institutional settlement. API is functioning at nominal capacity.</p>
+      <div class="links">
+        <a href="/health">Health Check</a>
+        <a href="/metrics">Prometheus Metrics</a>
+        <a href="/test-nodes">Node Diagnostics</a>
       </div>
     </div>
   `);
 });
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, 'client/dist')));
-
 // [DEBUG] Diagnostic Node Test Route
 app.get('/test-nodes', async (req, res) => {
   const axios = require('axios');
+  const { nodeHealthGauge } = require('./lib/metrics');
   const urls = [process.env.NODE_1_URL, process.env.NODE_2_URL, process.env.NODE_3_URL];
   const results = [];
   
@@ -71,32 +113,24 @@ app.get('/test-nodes', async (req, res) => {
     try {
       if (!urls[i]) {
         results.push({ node: i + 1, status: 'MISSING', url: 'NOT SET' });
+        nodeHealthGauge.set({ node_id: `Node ${i+1}`, url: 'MISSING' }, 0);
         continue;
       }
       const start = Date.now();
       const response = await axios.get(urls[i].replace('/sign', ''), { timeout: 5000 });
       results.push({ node: i + 1, status: 'ALIVE', latency: `${Date.now() - start}ms`, url: urls[i] });
+      nodeHealthGauge.set({ node_id: `Node ${i+1}`, url: urls[i] }, 1);
     } catch (err) {
       results.push({ node: i + 1, status: 'ERROR', error: err.message, url: urls[i] || 'NOT SET' });
+      nodeHealthGauge.set({ node_id: `Node ${i+1}`, url: urls[i] || 'NOT SET' }, 0);
     }
   }
   res.json({ environment: process.env.NODE_ENV, results });
 });
 
-// Catch-all route for React Router (must be the last route before app.listen)
-app.get('/*path', (req, res) => {
-  // If React isn't built, fallback to API welcome
-  if (!require('fs').existsSync(path.join(__dirname, 'client/dist/index.html'))) {
-    return res.send(`
-      <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
-        <h1>CONNEX Gateway</h1>
-        <p>Backend is ONLINE and Healthy. (React Frontend is running on Vercel)</p>
-        <a href="/test-nodes">Run Diagnostics</a>
-      </div>
-    `);
-  }
-  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
-});
+// Legacy paths redirected to root or handled as 404
+app.get('/api/welcome', (req, res) => res.redirect('/'));
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`CONNEX API is live on port ${PORT}`);
