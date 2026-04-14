@@ -4,13 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, ArrowRight, ShieldCheck, Zap, Cpu, Search, Filter, RefreshCw, ChevronRight } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
-const API_KEY = 'connex_secret_mvp_2026';
-const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin;
+// API key is sourced from the build-time environment — never hardcode secrets in source.
+const API_KEY = import.meta.env.VITE_API_KEY;
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000')
+  : window.location.origin;
 
-// Prototype Supabase Client (Direct Realtime Sync)
+// Supabase Realtime Client — uses the PUBLIC anon key (respects RLS).
+// The service role key must NEVER be used in frontend code.
 const supabase = createClient(
-  'https://kviikgfkwnkzokbcvmnw.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2aWlrZ2Zrd25rem9rYmN2bW53Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzk4NzUxNCwiZXhwIjoyMDg5NTYzNTE0fQ.TJ8WuA0JHkO6BVbKX-PMTwgL9RdxWjfn6pTwMgkYifQ'
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
 const api = axios.create({

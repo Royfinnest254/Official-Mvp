@@ -124,5 +124,6 @@ func main() {
 		}
 	} else {
 		fmt.Println("❌ BENCHMARK FAILED: 0 success.")
+
 	}
 }

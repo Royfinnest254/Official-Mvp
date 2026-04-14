@@ -1,52 +1,51 @@
 const express = require('express');
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const db = require('../lib/db');
 
 // GET /tx/stats - Get global network statistics
 router.get('/stats', async (req, res) => {
   try {
-    // Get total count of all records
-    const { count: total, error: totalErr } = await supabase
-      .from('coordination_records')
-      .select('*', { count: 'exact', head: true });
+    // [DAISY-CHAIN] Get total count from both projects
+    const jobs = [
+      db.supabaseLegacy ? db.supabaseLegacy.from('coordination_records').select('*', { count: 'estimated', head: true }) : Promise.resolve({ count: 0, error: null }),
+      db.supabaseCurrent ? db.supabaseCurrent.from('coordination_records').select('*', { count: 'estimated', head: true }) : Promise.resolve({ count: 0, error: null }),
+      db.supabaseCurrent ? db.supabaseCurrent.from('coordination_records').select('latency_ms').order('id', { ascending: false }).limit(50) : Promise.resolve({ data: [], error: null })
+    ];
+    const [legacyCountRes, currentCountRes, currentLatencyRes] = await Promise.all(jobs);
 
-    // Calculate Real Average Latency from the last 50 records
-    const { data: latencyRecords, error: latencyErr } = await supabase
-      .from('coordination_records')
-      .select('latency_ms')
-      .order('id', { ascending: false })
-      .limit(50);
+    const total = (legacyCountRes.count || 0) + (currentCountRes.count || 0);
 
-    let avgLatency = 42; // Default fallback
-    if (latencyRecords && latencyRecords.length > 0) {
+    // Calculate Average Latency from current project (relevant for current performance)
+    let avgLatency = 42;
+    const latencyRecords = currentLatencyRes.data || [];
+    if (latencyRecords.length > 0) {
       const totalLat = latencyRecords.reduce((acc, curr) => acc + (curr.latency_ms || 0), 0);
       avgLatency = Math.round(totalLat / latencyRecords.length);
     }
 
-    // Get count of transactions in the last 10 seconds for ultra-responsive TPS
-    const tenSecondsAgo = Date.now() - 10000;
-    const { count: recentCount, error: recentErr } = await supabase
-      .from('coordination_records')
-      .select('*', { count: 'exact', head: true })
-      .gt('event_ts', tenSecondsAgo);
-
-    const realTPS = (recentCount || 0) / 10;
-    const disputes = 0; // Displacement logic to be implemented later
-
-    if (totalErr || recentErr || latencyErr) {
-        throw (totalErr || recentErr || latencyErr);
+    // Recent TPS (Always from current project)
+    const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+    let recentCount = 0;
+    if (db.supabaseCurrent) {
+      const { count, error: recentErr } = await db.supabaseCurrent
+        .from('coordination_records')
+        .select('*', { count: 'exact', head: true })
+        .gt('created_at', tenSecondsAgo);
+      if (recentErr) throw recentErr;
+      recentCount = count || 0;
     }
 
+    const realTPS = (recentCount || 0) / 10;
+    const disputes = 0;
+
     res.json({ 
-      total: total || 0, 
-      disputes: disputes || 0,
+      total, 
+      disputes,
       tps: parseFloat(realTPS.toFixed(1)),
       latency: avgLatency
     });
   } catch (error) {
-    console.error("Error fetching stats:", error);
+    console.error("[Transactions] Error fetching stats:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -54,16 +53,11 @@ router.get('/stats', async (req, res) => {
 // GET /tx/recent - Get the latest network transactions for the live dashboard
 router.get('/recent', async (req, res) => {
   try {
-    const { data: records, error } = await supabase
-      .from('coordination_records')
-      .select('id, bundle_id, tx_ref_hash, institution_a, institution_b, event_type, event_ts, chain_hash')
-      .order('id', { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
+    // [DAISY-CHAIN] getChain handles aggregating from both if needed
+    const records = await db.getChain(50);
     res.json({ events: records });
   } catch (error) {
-    console.error("Error fetching recent tx:", error);
+    console.error("[Transactions] Error fetching recent tx:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -72,16 +66,11 @@ router.get('/recent', async (req, res) => {
 router.get('/:txId', async (req, res) => {
   const { txId } = req.params;
   try {
-    const { data: records, error } = await supabase
-      .from('coordination_records')
-      .select('*')
-      .eq('tx_ref_hash', txId)
-      .order('event_ts', { ascending: true });
-
-    if (error) throw error;
+    // [DAISY-CHAIN] getTxHistory searches both projects
+    const records = await db.getTxHistory(txId);
     res.json({ events: records });
   } catch (error) {
-    console.error("Error fetching tx history:", error);
+    console.error("[Transactions] Error fetching tx history:", error);
     res.status(500).json({ error: error.message });
   }
 });

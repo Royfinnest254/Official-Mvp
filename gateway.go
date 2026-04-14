@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -37,9 +36,10 @@ type ProofBundle struct {
 
 var (
 	prevHash       string
-	hashLock       sync.RWMutex
+	hashLock       sync.Mutex // Single mutex: read-check-write must be atomic to prevent chain forks
 	supabaseClient *supabase.Client
 	httpClient     *http.Client // Persistent Pool
+	startTime      = time.Now() // Recorded at process start for uptime calculation
 )
 
 func init() {
@@ -79,11 +79,14 @@ func main() {
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		hashLock.Lock()
+		phSnapshot := prevHash[:8]
+		hashLock.Unlock()
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":    "active",
 			"engine":    "Go Ultra-Latency",
-			"prev_hash": prevHash[:8],
-			"uptime":    time.Since(time.Now()).String(), // Placeholder for restart tracking
+			"prev_hash": phSnapshot,
+			"uptime":    time.Since(startTime).String(),
 		})
 	})
 
@@ -114,9 +117,12 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashLock.RLock()
+	// Snapshot prevHash under lock. The write-back at the end uses an
+	// optimistic concurrency check to prevent concurrent requests from
+	// forking the chain with duplicate prev_hash values.
+	hashLock.Lock()
 	currentPrevHash := prevHash
-	hashLock.RUnlock()
+	hashLock.Unlock()
 
 	// 1. Compute Hashing (Engine Innovation Layer)
 	h := sha256.New()
@@ -149,14 +155,15 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 			reqBody, _ := json.Marshal(map[string]string{"hash": chainHash})
 			resp, err := httpClient.Post(nodeURL+"/sign", "application/json", bytes.NewBuffer(reqBody))
 			if err == nil && resp.StatusCode == 200 {
-				defer resp.Body.Close()
 				var sigResp struct {
 					Signature string `json:"signature"`
 				}
 				if err := json.NewDecoder(resp.Body).Decode(&sigResp); err == nil {
 					resultsChan <- sigResp.Signature
 				}
-				io.Copy(ioutil.Discard, resp.Body)
+				// Drain before close so the connection can be reused by the pool.
+				io.Copy(io.Discard, resp.Body)
+				resp.Body.Close()
 			}
 		}(url)
 	}
@@ -193,8 +200,15 @@ func handleEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	// 4. Update Cache Locally (0ms)
+	// 4. Atomically commit the new chain tip.
+	// If another request updated prevHash while we were waiting for witness
+	// signatures, reject with 409 so the caller can retry with the fresh tip.
 	hashLock.Lock()
+	if prevHash != currentPrevHash {
+		hashLock.Unlock()
+		http.Error(w, "chain_conflict: prevHash changed during consensus, please retry", http.StatusConflict)
+		return
+	}
 	prevHash = chainHash
 	hashLock.Unlock()
 

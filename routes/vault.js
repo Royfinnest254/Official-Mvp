@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { getChain, supabase } = require('../lib/db');
+const db = require('../lib/db');
 const { hashBlock } = require('../lib/hash');
 
 // GET /vault - Return full hash chain
 router.get('/', async (req, res) => {
   try {
-    const blocks = await getChain();
+    // [DAISY-CHAIN] getChain already handles combining results
+    const blocks = await db.getChain(200); 
     res.json({ 
       vault_status: 'SECURE',
       total_traces: blocks.length,
@@ -20,12 +21,17 @@ router.get('/', async (req, res) => {
 // GET /vault/verify - Run detailed forensic integrity check
 router.get('/verify', async (req, res) => {
   try {
-    const { data: records, error } = await supabase
-      .from('coordination_records')
-      .select('*')
-      .order('id', { ascending: true });
+    // [DAISY-CHAIN] Fetch all records from legacy then current to verify flow
+    const [legacyRes, currentRes] = await Promise.all([
+      db.supabaseLegacy ? db.supabaseLegacy.from('coordination_records').select('*').order('id', { ascending: true }) : Promise.resolve({ data: [], error: null }),
+      db.supabaseCurrent ? db.supabaseCurrent.from('coordination_records').select('*').order('id', { ascending: true }) : Promise.resolve({ data: [], error: null })
+    ]);
 
-    if (error) throw error;
+    if (legacyRes.error) throw legacyRes.error;
+    if (currentRes.error) throw currentRes.error;
+
+    // Maintain chronological order
+    const records = (legacyRes.data || []).concat(currentRes.data || []);
 
     const failures = [];
     let lastHash = '0'.repeat(64);
@@ -34,7 +40,7 @@ router.get('/verify', async (req, res) => {
     for (const record of records) {
       const issues = [];
       
-      // 1. Linkage Check
+      // 1. Linkage Check (Critical for Daisy-Chain Transition)
       if (record.prev_hash !== lastHash) {
         issues.push({
           type: 'LINKAGE_BROKEN',
@@ -76,7 +82,7 @@ router.get('/verify', async (req, res) => {
     }
 
     const valid = failures.length === 0;
-    const integrityScore = Math.max(0, 100 - (failures.length / blocksChecked * 100));
+    const integrityScore = blocksChecked > 0 ? Math.max(0, 100 - (failures.length / blocksChecked * 100)) : 100;
 
     res.json({ 
       valid, 
@@ -86,6 +92,7 @@ router.get('/verify', async (req, res) => {
       timestamp: Date.now()
     });
   } catch (error) {
+    console.error("[Vault] Integrity Check Failure:", error.message);
     res.status(500).json({ error: error.message });
   }
 });

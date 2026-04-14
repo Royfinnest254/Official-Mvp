@@ -10,7 +10,7 @@ const vaultRoutes = require('./routes/vault');
 const healthRoutes = require('./routes/health');
 const transactionRoutes = require('./routes/transactions');
 const eventsRoutes = require('./routes/events');
-
+const rpcRoutes = require('./routes/rpc');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -64,11 +64,16 @@ app.use('/tx', authenticate, transactionRoutes);
 // [NEW] PRD v0.1 Endpoints
 app.use('/v1/events', authenticate, eventsRoutes);
 
+// Grafana Dashboard RPC endpoints — protected by API key.
+// Configure Grafana Infinity data source to send `x-api-key` header.
+app.use('/rpc', authenticate, rpcRoutes);
+
 // Lightweight Ping for Cron-jobs
 app.get('/ping', (req, res) => res.send('pong'));
 
-// Prometheus Metrics Endpoint
-app.get('/metrics', async (req, res) => {
+// Prometheus Metrics Endpoint — protected by API key.
+// Configure your Prometheus scrape job to send the Authorization header.
+app.get('/metrics', authenticate, async (req, res) => {
   const { register } = require('./lib/metrics');
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());

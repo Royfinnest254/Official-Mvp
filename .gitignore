@@ -11,6 +11,13 @@ client/node_modules/
 dist/
 client/dist/
 
+# --- Connex Binaries & Large Objects ---
+*.exe
+gateway
+witness
+vault_resp.json
+scratch/
+
 # System logs
 *.log
 npm-debug.log*

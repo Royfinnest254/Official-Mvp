@@ -1,0 +1,281 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFINITY",
+      "label": "Infinity",
+      "description": "Select your Infinity Data Source",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource"
+    }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
+    { "type": "datasource", "id": "yesoreyeram-infinity-datasource", "name": "Infinity", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "piechart", "name": "Pie chart", "version": "" },
+    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" },
+    { "type": "panel", "id": "bargauge", "name": "Bar gauge", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "description": "CONNEX Executive Command Center — LIVE Institutional Settlement Intelligence",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 99,
+      "panels": [],
+      "title": "⚡ EXECUTIVE COMMAND LAYER — LIVE SETTLEMENT INTELLIGENCE",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "#10b981", "value": null } ]},
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^total_transactions$/", "values": false },
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_dashboard_stats",
+        "format": "table",
+        "columns": [{ "selector": "total_transactions", "text": "total_transactions", "type": "number" }]
+      }],
+      "title": "TOTAL TRANSACTIONS",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "#0ea5e9", "value": null } ]},
+          "unit": "short",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^active_institutions$/", "values": false },
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_dashboard_stats",
+        "format": "table",
+        "columns": [{ "selector": "active_institutions", "text": "active_institutions", "type": "number" }]
+      }],
+      "title": "ACTIVE INSTITUTIONS",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "#10b981", "value": null },
+            { "color": "#f59e0b", "value": 100 },
+            { "color": "#ef4444", "value": 300 }
+          ]},
+          "unit": "short",
+          "decimals": 0,
+          "displayName": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^avg_latency$/", "values": false },
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_dashboard_stats",
+        "format": "table",
+        "columns": [{ "selector": "avg_latency", "text": "avg_latency", "type": "number" }]
+      }],
+      "title": "AVG CONSENSUS LATENCY (ms)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "#8b5cf6", "value": null } ]},
+          "unit": "short",
+          "decimals": 0,
+          "displayName": "USD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^VaultUSD$/", "values": false },
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_dashboard_stats",
+        "format": "table",
+        "columns": [{ "selector": "total_transactions", "text": "total_transactions", "type": "number" }]
+      }],
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "binary",
+            "reduce": { "reducer": "sum" },
+            "binary": { "left": "total_transactions", "operator": "*", "right": "1250" },
+            "alias": "VaultUSD"
+          }
+        }
+      ],
+      "title": "ESTIMATED VAULT ASSURANCE (USD)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 100,
+      "panels": [],
+      "title": "📡 LIVE THROUGHPUT & DISTRIBUTION MATRIX",
+      "type": "row"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#14b8a6" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 11, "w": 14, "x": 0, "y": 7 },
+      "id": 5,
+      "options": {
+        "legend": { "displayMode": "hidden", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_throughput_series",
+        "format": "timeseries",
+        "columns": [
+          { "selector": "time", "text": "time", "type": "timestamp" },
+          { "selector": "value", "text": "value", "type": "number" }
+        ]
+      }],
+      "title": "REAL-TIME NETWORK THROUGHPUT",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": "${DS_INFINITY}",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "CONFIRM" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#10b981" } }] },
+          { "matcher": { "id": "byName", "options": "REJECT" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ef4444" } }] }
+        ]
+      },
+      "gridPos": { "h": 11, "w": 10, "x": 14, "y": 7 },
+      "id": 6,
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [{
+        "datasource": "${DS_INFINITY}",
+        "refId": "A",
+        "type": "json",
+        "source": "url",
+        "url": "/rpc/get_event_distribution",
+        "format": "table",
+        "columns": [
+          { "selector": "metric", "text": "metric", "type": "string" },
+          { "selector": "value", "text": "value", "type": "number" }
+        ]
+      }],
+      "title": "EVENT TYPE DISTRIBUTION",
+      "transparent": true,
+      "type": "piechart"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["executive", "connex", "command-center", "live"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "utc",
+  "title": "CONNEX GLOBAL COMMAND CENTER (LIVE)",
+  "uid": "connex-exec-live-v9",
+  "version": 1
+}

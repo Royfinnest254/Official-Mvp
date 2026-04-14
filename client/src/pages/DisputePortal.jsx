@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle, Copy, Check, Download, ExternalLink } from 'lucide-react';
 
-const API_KEY = 'connex_secret_mvp_2026';
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000' 
+// API key is sourced from the build-time environment — never hardcode secrets in source.
+const API_KEY = import.meta.env.VITE_API_KEY;
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000')
   : window.location.origin;
 
 const api = axios.create({

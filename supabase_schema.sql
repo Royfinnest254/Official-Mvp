@@ -27,6 +27,7 @@ CREATE RULE no_delete AS ON DELETE TO coordination_records DO INSTEAD NOTHING;
 
 -- Index for fast lookup of transaction history and chain state
 CREATE INDEX idx_records_bundle_id ON public.coordination_records(bundle_id);
+CREATE INDEX idx_records_tx_hash ON public.coordination_records(tx_ref_hash);
 CREATE INDEX idx_records_institutions ON public.coordination_records(institution_a, institution_b);
 CREATE INDEX idx_records_ts ON public.coordination_records(event_ts DESC);
 

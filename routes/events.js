@@ -1,104 +1,86 @@
 const express = require('express');
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
+const db = require('../lib/db');
+const { signBlock } = require('../lib/sign');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
-// POST /v1/events - Receive a coordination event from the bank simulation
+// POST /v1/events - Seal a coordination event from the bank simulation.
+//
+// Body: { institution_a, institution_b, event_type, tx_ref_hash, timestamp? }
+// event_type must be: INITIATE | CONFIRM | REJECT | REVERSE
+// Any unknown event_type is normalised to CONFIRM.
 router.post('/', async (req, res) => {
-  const { institution_a, institution_b, event_type, tx_ref_hash, timestamp, account_info } = req.body;
+  const { institution_a, institution_b, event_type, tx_ref_hash, timestamp } = req.body;
 
   if (!institution_a || !institution_b || !event_type || !tx_ref_hash) {
-    return res.status(400).json({ error: 'Missing required fields: institution_a, institution_b, event_type, tx_ref_hash' });
+    return res.status(400).json({
+      error: 'Missing required fields: institution_a, institution_b, event_type, tx_ref_hash',
+    });
   }
 
-  // Validate event_type against schema constraints
   const validTypes = ['INITIATE', 'CONFIRM', 'REJECT', 'REVERSE'];
   const normalizedType = event_type.toUpperCase();
   const finalType = validTypes.includes(normalizedType) ? normalizedType : 'CONFIRM';
 
   try {
-    // Get last record to build the chain
-    const { data: lastRecord } = await supabase
-      .from('coordination_records')
-      .select('chain_hash')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single();
-
+    // Fetch the current chain tip across both Legacy and Current projects.
+    const lastRecord = await db.getLatestBlock();
     const prevHash = lastRecord?.chain_hash || '0'.repeat(64);
 
-    const startTime = Date.now();
-
-    // Remove zero-padding: Use original tx_ref_hash
     const cleanTxHash = tx_ref_hash.trim();
-
-    // Generate unique IDs and hashes
     const event_id = crypto.randomUUID();
-    const bundle_id = 'BND-' + crypto.randomBytes(5).toString('hex').toUpperCase(); // 14 chars total
+    const bundle_id = 'BND-' + crypto.randomBytes(5).toString('hex').toUpperCase();
     const ts = timestamp || Date.now();
 
+    // Compute the chain hash using the same field order as vault.js /verify.
     const chain_hash = crypto
       .createHash('sha256')
       .update(cleanTxHash + institution_a + institution_b + prevHash + ts)
       .digest('hex');
 
-    // Lightweight placeholder signatures (real nodes sign in Go layer)
-    const sig1 = crypto.createHash('sha256').update(chain_hash + '1').digest('hex');
-    const sig2 = crypto.createHash('sha256').update(chain_hash + '2').digest('hex');
-    const sig3 = crypto.createHash('sha256').update(chain_hash + '3').digest('hex');
+    // Collect real ed25519 signatures from all three witness keys.
+    // Replaces the previous placeholder SHA-256 "signatures" that offered
+    // no cryptographic proof of multi-party witness (see audit BUG-5).
+    const signatures = await signBlock(chain_hash);
 
-    // Simulate realistic cross-border consensus latency (25ms - 85ms)
+    // Simulate realistic cross-border consensus latency (25ms – 85ms).
     const latency = Math.floor(Math.random() * 60) + 25;
-    const { data, error } = await supabase
-      .from('coordination_records')
-      .insert([{
-        bundle_id,
-        event_id,
-        institution_a,
-        institution_b,
-        event_type: finalType,
-        tx_ref_hash: cleanTxHash,
-        chain_hash,
-        prev_hash: prevHash,
-        sig_node_1: sig1,
-        sig_node_2: sig2,
-        sig_node_3: sig3,
-        event_ts: ts,
-        latency_ms: latency // AUTHENTIC: System-measured duration
-      }])
-      .select('id, bundle_id, chain_hash')
-      .single();
 
-    if (error) throw error;
-
-    // --- PROMETHEUS METRICS ---
-    const { transactionCounter, consensusLatency } = require('../lib/metrics');
-    transactionCounter.inc({ 
-      institution_a, 
-      institution_b, 
-      status: 'sealed',
-      event_type: finalType 
+    const data = await db.insertBlock({
+      bundle_id,
+      event_id,
+      institution_a,
+      institution_b,
+      event_type:  finalType,
+      tx_ref_hash: cleanTxHash,
+      chain_hash,
+      prev_hash:   prevHash,
+      sig_node_1:  signatures[0].signature,
+      sig_node_2:  signatures[1].signature,
+      sig_node_3:  signatures[2].signature,
+      event_ts:    ts,
+      latency_ms:  latency,
     });
-    consensusLatency.observe(latency / 1000); // observe in seconds
-    // --------------------------
+
+    // Update Prometheus counters.
+    const { transactionCounter, consensusLatency } = require('../lib/metrics');
+    transactionCounter.inc({ institution_a, institution_b, status: 'sealed', event_type: finalType });
+    consensusLatency.observe(latency / 1000);
 
     res.status(201).json({
-      status: 'sealed',
-      id: data.id,
-      bundle_id: data.bundle_id,
-      chain_hash: data.chain_hash
+      status:     'sealed',
+      id:         data.id,
+      bundle_id:  data.bundle_id,
+      chain_hash: data.chain_hash,
     });
   } catch (error) {
-    console.error('[Events] Error inserting record:', error.message);
-    // Record failure metric
+    console.error('[Events] Error processing record:', error.message);
     const { transactionCounter } = require('../lib/metrics');
-    transactionCounter.inc({ 
+    transactionCounter.inc({
       institution_a: req.body.institution_a || 'unknown',
       institution_b: req.body.institution_b || 'unknown',
-      status: 'failure',
-      event_type: req.body.event_type || 'UNKNOWN'
+      status:        'failure',
+      event_type:    req.body.event_type || 'UNKNOWN',
     });
     res.status(500).json({ error: error.message });
   }
