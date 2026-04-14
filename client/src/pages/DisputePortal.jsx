@@ -4,9 +4,7 @@ import { Search, ShieldCheck, Clock, Server, CheckCircle2, AlertCircle, Copy, Ch
 
 // API key is sourced from the build-time environment — never hardcode secrets in source.
 const API_KEY = import.meta.env.VITE_API_KEY;
-const API_BASE_URL = window.location.hostname === 'localhost'
-  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000')
-  : window.location.origin;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -12,7 +12,7 @@ CREATE TABLE public.coordination_records (
   event_type    VARCHAR(16)  NOT NULL CHECK (event_type IN ('INITIATE', 'CONFIRM', 'REJECT', 'REVERSE')),
   tx_ref_hash   VARCHAR(64)  NOT NULL,
   chain_hash    CHAR(64)     NOT NULL,
-  prev_hash     CHAR(64)     NOT NULL,
+  prev_hash     CHAR(64)     NOT NULL UNIQUE,
   sig_node_1    TEXT         NOT NULL,
   sig_node_2    TEXT         NOT NULL,
   sig_node_3    TEXT         NOT NULL,
@@ -21,9 +21,21 @@ CREATE TABLE public.coordination_records (
   created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
--- Append-only enforcement (No UPDATE, No DELETE)
-CREATE RULE no_update AS ON UPDATE TO coordination_records DO INSTEAD NOTHING;
-CREATE RULE no_delete AS ON DELETE TO coordination_records DO INSTEAD NOTHING;
+-- Immutable Ledger Enforcement (Stronger than RULES)
+CREATE OR REPLACE FUNCTION prevent_mutation()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION 'Blockchain Integrity Violation: Modification of sealed records is prohibited.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_prevent_update
+BEFORE UPDATE ON public.coordination_records
+FOR EACH ROW EXECUTE FUNCTION prevent_mutation();
+
+CREATE TRIGGER tr_prevent_delete
+BEFORE DELETE ON public.coordination_records
+FOR EACH ROW EXECUTE FUNCTION prevent_mutation();
 
 -- Index for fast lookup of transaction history and chain state
 CREATE INDEX idx_records_bundle_id ON public.coordination_records(bundle_id);

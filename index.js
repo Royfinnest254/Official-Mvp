@@ -139,5 +139,16 @@ app.get('/api/welcome', (req, res) => res.redirect('/'));
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`CONNEX API is live on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  
+  // Verify cryptographic seam on startup
+  const { validateDaisyChainLink } = require('./lib/db');
+  validateDaisyChainLink().then(res => {
+    if (res.status === 'LINKED' && res.valid) {
+      console.log('✅ Blockchain Integrity: Global chain linkage verified.');
+    } else if (res.status === 'LINKED' && !res.valid) {
+      console.error('❌ Blockchain Integrity Alert: Seam mismatch between projects!');
+    } else {
+      console.log('ℹ️  Blockchain Integrity: Running in standalone mode.');
+    }
+  });
 });

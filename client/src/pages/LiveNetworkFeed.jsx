@@ -6,9 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // API key is sourced from the build-time environment — never hardcode secrets in source.
 const API_KEY = import.meta.env.VITE_API_KEY;
-const API_BASE_URL = window.location.hostname === 'localhost'
-  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000')
-  : window.location.origin;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Supabase Realtime Client — uses the PUBLIC anon key (respects RLS).
 // The service role key must NEVER be used in frontend code.

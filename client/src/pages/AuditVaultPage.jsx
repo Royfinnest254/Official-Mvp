@@ -4,11 +4,8 @@ import AuditVault from '../components/AuditVault';
 import { Database, ShieldCheck, RefreshCw, AlertTriangle, FileText, Download, Filter, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000' 
-  : window.location.origin;
-
-const API_KEY = 'connex_secret_mvp_2026';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 export default function AuditVaultPage() {
   const [blocks, setBlocks] = useState([]);
