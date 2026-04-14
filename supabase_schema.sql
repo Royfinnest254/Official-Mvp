@@ -17,6 +17,8 @@ CREATE TABLE public.coordination_records (
   sig_node_2    TEXT         NOT NULL,
   sig_node_3    TEXT         NOT NULL,
   latency_ms    INTEGER,
+  amount        DECIMAL(20, 2) NOT NULL DEFAULT 0,
+  currency      VARCHAR(3)   NOT NULL DEFAULT 'USD',
   event_ts      BIGINT       NOT NULL,
   created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
 );

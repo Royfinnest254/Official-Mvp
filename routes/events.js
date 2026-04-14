@@ -2,15 +2,15 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const db = require('../lib/db');
-const { signBlock } = require('../lib/sign');
+const { hashBlock } = require('../lib/hash');
 
 // POST /v1/events - Seal a coordination event from the bank simulation.
 //
-// Body: { institution_a, institution_b, event_type, tx_ref_hash, timestamp? }
+// Body: { institution_a, institution_b, event_type, tx_ref_hash, amount, currency, timestamp? }
 // event_type must be: INITIATE | CONFIRM | REJECT | REVERSE
 // Any unknown event_type is normalised to CONFIRM.
 router.post('/', async (req, res) => {
-  const { institution_a, institution_b, event_type, tx_ref_hash, timestamp } = req.body;
+  const { institution_a, institution_b, event_type, tx_ref_hash, amount, currency, timestamp } = req.body;
 
   if (!institution_a || !institution_b || !event_type || !tx_ref_hash) {
     return res.status(400).json({
@@ -32,19 +32,14 @@ router.post('/', async (req, res) => {
     const bundle_id = 'BND-' + crypto.randomBytes(5).toString('hex').toUpperCase();
     const ts = timestamp || Date.now();
 
-    // Compute the chain hash using the same field order as vault.js /verify.
-    const chain_hash = crypto
-      .createHash('sha256')
-      .update(cleanTxHash + institution_a + institution_b + prevHash + ts)
-      .digest('hex');
+    // Compute the canonical chain hash using the standardized shared library.
+    const chain_hash = hashBlock(cleanTxHash, institution_a, institution_b, prevHash, ts);
 
     // Collect real ed25519 signatures from all three witness keys.
-    // Replaces the previous placeholder SHA-256 "signatures" that offered
-    // no cryptographic proof of multi-party witness (see audit BUG-5).
+    // Measuring real latency for consensus metrics.
+    const startConsensus = Date.now();
     const signatures = await signBlock(chain_hash);
-
-    // Simulate realistic cross-border consensus latency (25ms – 85ms).
-    const latency = Math.floor(Math.random() * 60) + 25;
+    const latency = Date.now() - startConsensus;
 
     const data = await db.insertBlock({
       bundle_id,
@@ -53,6 +48,8 @@ router.post('/', async (req, res) => {
       institution_b,
       event_type:  finalType,
       tx_ref_hash: cleanTxHash,
+      amount:      parseFloat(amount) || 0,
+      currency:    currency || 'USD',
       chain_hash,
       prev_hash:   prevHash,
       sig_node_1:  signatures[0].signature,

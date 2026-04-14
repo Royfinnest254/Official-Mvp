@@ -60,8 +60,8 @@ function App() {
           </div>
           <div className="h-5 w-px bg-slate-700 mx-2"></div>
           <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-2 py-1 rounded transition-colors duration-150">
-             <div className="h-6 w-6 rounded-full bg-highlight flex items-center justify-center text-[10px] font-bold text-primary">RC</div>
-             <span className="text-xs font-bold text-slate-300 tracking-tight">royfinnest254</span>
+             <div className="h-6 w-6 rounded-full bg-highlight flex items-center justify-center text-[10px] font-bold text-primary">OP</div>
+             <span className="text-xs font-bold text-slate-300 tracking-tight">Operator</span>
           </div>
         </div>
       </header>

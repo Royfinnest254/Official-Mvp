@@ -137,12 +137,14 @@ func main() {
 	fmt.Printf("⚡ Firing %d events...\n", iterations)
 
 	for i := 0; i < iterations; i++ {
-		payload := map[string]string{
+		payload := map[string]interface{}{
 			"institution_a": "MPESA",
 			"institution_b": "KCB",
 			"event_type":    "INITIATE",
 			// Use a unique tx_ref_hash per iteration so each event is distinct.
 			"tx_ref_hash": fmt.Sprintf("bench_tx_%d_%d", i+1, time.Now().UnixNano()),
+			"amount":      1500.25 + float64(i)*100.50,
+			"currency":    "KES",
 			"timestamp":   fmt.Sprintf("%d", time.Now().UnixMilli()),
 		}
 		body, _ := json.Marshal(payload)

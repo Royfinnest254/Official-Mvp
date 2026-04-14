@@ -11,6 +11,7 @@ const healthRoutes = require('./routes/health');
 const transactionRoutes = require('./routes/transactions');
 const eventsRoutes = require('./routes/events');
 const rpcRoutes = require('./routes/rpc');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,10 +20,23 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP for PoC to prevent frontend blocks
   crossOriginResourcePolicy: false // Disable CORP to allow Vercel frontend to fetch
 }));
-app.use(cors({
-  origin: '*', // Prototype-friendly (use specific domain in production)
+
+// Restrict CORS to authorized frontend domains to prevent CSRF and unauthorized access.
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
   allowedHeaders: ['Content-Type', 'x-api-key']
-}));
+};
+app.use(cors(corsOptions));
+
+// Rate Limiting: Prevent automated brute-force or DoS attacks on the ledger.
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+app.use('/v1/', limiter);
+app.use('/observations', limiter);
+
 app.use(morgan('dev'));
 app.use(express.json());
 

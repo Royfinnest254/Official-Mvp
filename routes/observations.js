@@ -7,7 +7,7 @@ const { signBlock } = require('../lib/sign');
 
 // POST /observations - Record a new coordination event
 router.post('/', async (req, res) => {
-  const { txId, fromBank, toBank, status } = req.body;
+  const { txId, fromBank, toBank, status, amount, currency } = req.body;
 
   if (!txId || !fromBank || !toBank || !status) {
     return res.status(400).json({ error: 'Missing required fields: txId, fromBank, toBank, status' });
@@ -25,14 +25,13 @@ router.post('/', async (req, res) => {
     const prevHash = lastRecord ? lastRecord.chain_hash : '0'.repeat(64);
     const ts = Date.now();
 
-    // Compute chain hash using all fields that identify this event.
-    // IMPORTANT: The argument order here must exactly match the order used
-    // in vault.js /verify when recomputing the hash for integrity checking.
+    // Compute canonical chain hash using the standardized shared library.
     const chainHash = hashBlock(txId, fromBank, toBank, prevHash, ts);
 
     // Collect real ed25519 signatures from all three witness keys.
-    // Requires CBK_PRIVATE_KEY, BoU_PRIVATE_KEY, IFC_PRIVATE_KEY in env.
+    const startConsensus = Date.now();
     const signatures = await signBlock(chainHash);
+    const latency = Date.now() - startConsensus;
 
     const newRecord = await db.insertBlock({
       bundle_id:    'OBS-' + crypto.randomBytes(4).toString('hex').toUpperCase(),
@@ -41,13 +40,15 @@ router.post('/', async (req, res) => {
       institution_b: toBank,
       event_type:   normalizedStatus,
       tx_ref_hash:  txId,
+      amount:       parseFloat(amount) || 0,
+      currency:     currency || 'USD',
       chain_hash:   chainHash,
       prev_hash:    prevHash,
       sig_node_1:   signatures[0].signature,
       sig_node_2:   signatures[1].signature,
       sig_node_3:   signatures[2].signature,
       event_ts:     ts,
-      latency_ms:   null,
+      latency_ms:   latency,
     });
 
     res.status(201).json({
@@ -70,10 +71,10 @@ router.post('/', async (req, res) => {
 // Instead, a new block is sealed that references the original txId and the
 // new status, inheriting institutions from the transaction's history.
 //
-// Body: { status, reason? }
+// Bodies: { status, reason?, amount, currency }
 router.patch('/:txId/status', async (req, res) => {
   const { txId } = req.params;
-  const { status, reason } = req.body;
+  const { status, reason, amount, currency } = req.body;
 
   if (!status) {
     return res.status(400).json({ error: 'Missing required field: status' });
@@ -105,7 +106,10 @@ router.patch('/:txId/status', async (req, res) => {
     // Inherit institutions from the original transaction entry.
     const original = txHistory[0];
     const chainHash = hashBlock(txId, original.institution_a, original.institution_b, prevHash, ts);
+    
+    const startConsensus = Date.now();
     const signatures = await signBlock(chainHash);
+    const latency = Date.now() - startConsensus;
 
     const newRecord = await db.insertBlock({
       bundle_id:     'UPD-' + crypto.randomBytes(4).toString('hex').toUpperCase(),
@@ -114,13 +118,15 @@ router.patch('/:txId/status', async (req, res) => {
       institution_b: original.institution_b,
       event_type:    normalizedStatus,
       tx_ref_hash:   txId,
+      amount:        parseFloat(amount) || original.amount || 0,
+      currency:      currency || original.currency || 'USD',
       chain_hash:    chainHash,
       prev_hash:     prevHash,
       sig_node_1:    signatures[0].signature,
       sig_node_2:    signatures[1].signature,
       sig_node_3:    signatures[2].signature,
       event_ts:      ts,
-      latency_ms:    null,
+      latency_ms:    latency,
     });
 
     res.json({
